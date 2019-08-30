@@ -1,29 +1,28 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import $ from 'jquery';
-
-function App() {
-
-      $(function () {
-        var socket = window.io();
-        $('form').submit(function(){
-          socket.emit('chat message', $('#m').val());
-          $('#m').val('');
-          return false;
-        });
-        socket.on('chat message', function(msg){
-          $('#messages').append($('<li>').text(msg));
-          window.scrollTo(0, document.body.scrollHeight);
-        });
-      });
-
-
-  return (
-    <div className="App">
-     hello
-    </div>
-  );
+import { Socket, Event } from 'react-socket-io';
+ 
+const uri = 'http://localhost:8000';
+const options = { transports: ['websocket'] };
+ 
+export default class App extends React.Component {
+     constructor(props) {
+        super(props);
+        this.onMessage = this.onMessage.bind(this);
+    }
+ 
+    onMessage(message) {
+        console.log(message);
+    }
+ 
+    render() {
+        return (
+            <Socket uri={uri} options={options}> 
+                <Event event='chat message' handler={this.onMessage} />
+            </Socket>
+        );
+    }
 }
 
-export default App;
+
