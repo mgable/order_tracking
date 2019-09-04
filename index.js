@@ -21,7 +21,7 @@ try {
 
 io.on('connection', (socket) => {
 	//socket.on('chat message', (msg) => {
-		io.emit('chat message', "Simulation Started" );
+		// io.emit('chat message', "Simulation Started" );
 		console.log("Simulation Started")
 		let time = 0,
 			itemCount = 0,
@@ -29,7 +29,7 @@ io.on('connection', (socket) => {
 			cancel = setInterval(() => {
 				let results = _.where(contentSorted, {sent_at_second: time});
 					_.forEach(results, (result) => {
-						io.emit('chat message', "event: " + result.event_name);
+						io.emit('chat message', result);
 						console.info("result.event_name ", result.event_name)
 						itemCount++
 					});
