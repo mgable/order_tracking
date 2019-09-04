@@ -20,26 +20,35 @@ try {
 });*/
 
 io.on('connection', (socket) => {
-	//socket.on('chat message', (msg) => {
-		// io.emit('chat message', "Simulation Started" );
-		console.log("Simulation Started")
-		let time = 0,
-			itemCount = 0,
-			totalItems = contentSorted.length,
+	var cancel;
+	socket.on('system-message', (msg) => {
+		console.info("I recieved a message", msg);
+		if (msg === "start"){
+			io.emit('system-message', "Simulation Started" );
+			console.log("Simulation Started")
+			let time = 0,
+				itemCount = 0,
+				totalItems = contentSorted.length;
 			cancel = setInterval(() => {
 				let results = _.where(contentSorted, {sent_at_second: time});
 					_.forEach(results, (result) => {
-						io.emit('chat message', result);
+						io.emit('order-message', result);
 						console.info("result.event_name ", result.event_name)
 						itemCount++
 					});
 					time++;
 					if (itemCount === totalItems){
 						clearInterval(cancel);
-						io.emit('chat message', "Simulation Completed" );
+						io.emit('system-message', "Simulation Completed" );
+						console.log("Simulation Completed")
 					}
 			}, 1000);
-	//});
+		} else if (msg === "stop"){
+			clearInterval(cancel);
+			io.emit('system-message', "Simulation Stopped" );
+			console.log("Simulation Stopped")
+		}
+	});
 });
 
 http.listen(port, () => {

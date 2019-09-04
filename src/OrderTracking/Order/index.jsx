@@ -5,13 +5,12 @@ import './order.css';
 export default class Order extends React.Component {
      constructor(props) {
         super(props);
-        console.info(props)
     }
  
     render() {
-        let {id, destination, event_name, name, sent_at_second } = this.props.props
+        let {id, destination, event_name, name, sent_at_second } = this.props
         return (
-           <div className="order">
+           <div className="order" key={id}>
             <div className="id">Order ID:  {id}</div>
             <div className="name">Name: {name}</div>
             <div>Desintation: {destination}</div>

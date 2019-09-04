@@ -15,10 +15,20 @@ class Orders extends React.Component {
         this.orders = [];
     }
 
-    componentDidUpdate() {
-    	let newOrder = <Order props={ {...this.props.order} } />
-      this.orders.push(newOrder)
-      window.scrollTo(0, document.body.scrollHeight);
+    UNSAFE_componentWillUpdate() {
+      let orders = this.props.orders;
+      this.orders = [];
+
+      for (let id in orders){
+        let order = orders[id]
+        if (order.id){
+          this.orders.push(<Order key={id} {...order} />);
+        }
+      }
+    
+      if (!this.orders.length){
+        this.orders = <h4>There are no orders</h4>
+      } 
     }
  
     onMessage(order) {
@@ -26,23 +36,24 @@ class Orders extends React.Component {
     }
  
     render() {
-        return (
-        	<div>
-	            <Socket uri={uri} options={options}> 
-	                <Event event='chat message' handler={this.onMessage} />
-	            </Socket>
-	            <div id="orders">{this.orders}</div>
-	        </div>
-        );
+      return (
+      	<div className="order-tracking">
+            <Socket uri={uri} options={options}> 
+                <Event event='order-message' handler={this.onMessage} />
+            </Socket>
+            {this.orders}
+        </div>
+      );
     }
 }
 
-const getOrder = state => state.currentOrder;
-
+const getCurrentOrder = state => state.currentOrder;
+const getOrders = state => state.orders;
 
 const mapStateToProps = state => {
   return {
-  	order: getOrder(state)
+  	currentOrder: getCurrentOrder(state),
+    orders: getOrders(state)
   };
 };
 
