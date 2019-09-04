@@ -1,3 +1,16 @@
 .order {
 	margin: 0 0 20px 0;
+	border: 1px solid darkgray;
+	padding: 10px;
+	border-radius: 3px;
+	div {
+		font: {
+			weight: bold;
+		}
+		span {
+			font: {
+				weight: normal;
+			}
+		}
+	}
 }

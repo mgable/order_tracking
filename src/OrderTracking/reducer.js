@@ -1,30 +1,44 @@
 import {
 	ORDER_RECEIVED,
 	CANCELLED,
-	DELIVERED
+	DELIVERED,
+	STATUS_RECEIVED
 } from './types';
+
+import { simulationStopped } from '../config';
 
 const initial = {
 	raw:[],
 	orders: {},
 	history: [],
-	currentOrder: null
+	currentOrder: null,
+	status: simulationStopped
 };
 
 const Orders = (state = initial, action) => {
 	switch (action.type) {
 		case ORDER_RECEIVED:
 			return orderReceived(state, action);
+		case STATUS_RECEIVED:
+			return setStatus(state, action)
 		default:
 			return state;
 	}
 };
 
+const setStatus = (state, action) => {
+	let status = action.status;
+	if (state.status !== status){
+		return Object.assign({}, state, {status})
+	}
+
+	return state;
+}
+
 const cancelOrder = (state, action) => {
 	let currentOrder = action.order,
 		id = currentOrder.id;
 	state.history.push(currentOrder);
-	console.info("I am removing", id);
 	delete state.orders[id];
 	return Object.assign({}, state, {currentOrder})
 }

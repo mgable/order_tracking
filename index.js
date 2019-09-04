@@ -1,7 +1,8 @@
-var app = require('express')(), 
+var config = require('./src/config'),
+	app = require('express')(), 
 	http = require('http').Server(app), 
 	io = require('socket.io')(http), 
-	port = process.env.PORT || 8000, 
+	port = config.port || 8000, 
 	fs = require('fs'),
 	 _ = require('underscore'),
 	 contentSorted;
@@ -21,32 +22,32 @@ try {
 
 io.on('connection', (socket) => {
 	var cancel;
-	socket.on('system-message', (msg) => {
+	socket.on(config.systemMessage, (msg) => {
 		console.info("I recieved a message", msg);
 		if (msg === "start"){
-			io.emit('system-message', "Simulation Started" );
-			console.log("Simulation Started")
+			io.emit(config.systemMessage, config.simulationStarted );
+			console.log(config.simulationStarted)
 			let time = 0,
 				itemCount = 0,
 				totalItems = contentSorted.length;
 			cancel = setInterval(() => {
 				let results = _.where(contentSorted, {sent_at_second: time});
 					_.forEach(results, (result) => {
-						io.emit('order-message', result);
+						io.emit(config.orderMessage, result);
 						console.info("result.event_name ", result.event_name)
 						itemCount++
 					});
 					time++;
 					if (itemCount === totalItems){
 						clearInterval(cancel);
-						io.emit('system-message', "Simulation Completed" );
-						console.log("Simulation Completed")
+						io.emit(config.systemMessage, config.simulationCompleted );
+						console.log(config.simulationCompleted)
 					}
 			}, 1000);
 		} else if (msg === "stop"){
 			clearInterval(cancel);
-			io.emit('system-message', "Simulation Stopped" );
-			console.log("Simulation Stopped")
+			io.emit(config.systemMessage, config.simulationStopped );
+			console.log(config.simulationStopped)
 		}
 	});
 });

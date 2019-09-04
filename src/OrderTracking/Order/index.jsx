@@ -10,12 +10,12 @@ export default class Order extends React.Component {
     render() {
         let {id, destination, event_name, name, sent_at_second } = this.props
         return (
-           <div className="order" key={id}>
-            <div className="id">Order ID:  {id}</div>
-            <div className="name">Name: {name}</div>
-            <div>Desintation: {destination}</div>
-            <div>Event: {event_name}</div>
-            <div>Time: {sent_at_second}</div>
+           <div className="order">
+            <div>Order ID:  <span>{id}</span></div>
+            <div>Name: <span>{name}</span></div>
+            <div>Desintation: <span>{destination}</span></div>
+            <div>Event: <span>{event_name}</span></div>
+            <div>Time: <span>{sent_at_second}</span></div>
            </div>
         );
     }
