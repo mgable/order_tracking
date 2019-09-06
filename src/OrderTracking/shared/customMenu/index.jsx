@@ -10,7 +10,6 @@ export class CustomToggle extends React.Component {
 
   handleClick(e) {
     e.preventDefault();
-    console.info("xxxx", e);
     this.props.onClick(e);
   }
 
@@ -33,7 +32,6 @@ export class CustomMenu extends React.Component {
   }
 
   handleChange(e) {
-    console.info("I changed", e);
     this.setState({ value: e.target.value.toLowerCase().trim() });
   }
 
@@ -43,11 +41,12 @@ export class CustomMenu extends React.Component {
       style,
       className,
       'aria-labelledby': labeledBy,
+      id
     } = this.props;
 
     return (
       <div style={style} className={className} aria-labelledby={labeledBy}>
-          <ul className="list-unstyled" id="filter-menu">
+          <ul className="list-unstyled" id={id}>
             {React.Children.toArray(children)}
           </ul>
       </div>

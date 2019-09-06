@@ -10,7 +10,7 @@ import { simulationStopped } from '../config';
 const initial = {
 	raw:[],
 	orders: {},
-	history: [],
+	history: {},
 	currentOrder: null,
 	status: simulationStopped
 };
@@ -38,7 +38,7 @@ const setStatus = (state, action) => {
 const cancelOrder = (state, action) => {
 	let currentOrder = action.order,
 		id = currentOrder.id;
-	state.history.push(currentOrder);
+	state.history[id] = currentOrder;
 	delete state.orders[id];
 	return Object.assign({}, state, {currentOrder})
 }
