@@ -5,6 +5,8 @@ export const DRIVER_RECEIVED = 'DRIVER_RECEIVED';
 export const DELIVERED = 'DELIVERED';
 export const CANCELLED = 'CANCELLED';
 
+export const activeClass = 'active';
+
 export const statusCodes = {[CREATED]: 1, [COOKED]: 2, [DRIVER_RECEIVED]: 3, [DELIVERED]: 4, [CANCELLED]: 5}
 
 /* event types */
