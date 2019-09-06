@@ -5,4 +5,13 @@
 	.panel {
 		margin: 20px 0 0 0;
 	}
+
+	.status-bar {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px;
+	}
 }

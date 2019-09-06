@@ -2,9 +2,10 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Socket, Event } from 'react-socket-io';
 import Order from './Order';
-import { orderRecevied, statusReceived } from './types';
+import { orderRecevied, statusReceived, statusCodes, DELIVERED, CREATED, COOKED } from './types';
 import  * as config  from '../config';
-import {Button} from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
+import { DropDown  } from './shared/dropDown';
 import './orderTracking.scss';
 
 
@@ -14,6 +15,7 @@ const options = config.options;
 class Orders extends React.Component {
      constructor(props) {
         super(props);
+        this.state = {activeFilter: null, historyFilter: null};
         this.orders = [];
     }
 
@@ -23,6 +25,10 @@ class Orders extends React.Component {
 
       this.orders = [];
       this.history = []
+
+      if (this.state.activeFilter) {
+        orders = filter(orders, this.state.activeFilter)
+      }
 
       for (let id in orders){
         let order = orders[id]
@@ -45,16 +51,28 @@ class Orders extends React.Component {
     onStartSimulation(){
       var socket = window.io(uri);
       socket.emit(config.systemMessage, "start");
-      console.info("I started");
     }
  
     onOrderMessage(order) {
-      console.info("I received an order", order);
         this.props.handleOrderReceived(order);
     }
 
     onSystemMessage(status){
       this.props.handleStatusReceived(status)
+    }
+
+    onSetSelected(evt) {
+      console.info("hey", evt.target.text); 
+      let isActive = evt.target.classList.contains('active');
+      if (isActive){
+        console.info("I am active");
+        if (this.state.activeFilter !== evt.target.text){
+          this.setState({activeFilter: evt.target.text})
+        }
+      } else {
+        console.info("NOT active");
+        this.setState({activeFilter: null})
+      }
     }
  
     render() {
@@ -73,17 +91,37 @@ class Orders extends React.Component {
 
             <div className="row panel">
               <div className="col-sm-6 border col">
-                <h3>Orders</h3>
+                <div className="status-bar">
+                  <h3>Orders</h3>
+                  <span>active orders {this.orders.length || 0}</span>
+
+                    <DropDown props={ {items: [CREATED, COOKED], label: "Filter", onSetSelected: this.onSetSelected.bind(this)}} />
+
+                </div>
                 {this.orders}
               </div>
               <div className="col-sm-6 border col">
+               <div className="status-bar">
                 <h3>History</h3>
+                </div>
                 {this.history}
               </div>
             </div>
         </div>
       );
     }
+}
+
+const filter = (orders, filterBy) => {
+  let results = {}
+  for (let id in orders){
+    let order = orders[id];
+    if (order.event_name === filterBy){
+      results[id] = order
+    }
+  }
+
+  return results;
 }
 
 const getCurrentOrder = state => state.currentOrder;
@@ -96,7 +134,8 @@ const mapStateToProps = state => {
   	currentOrder: getCurrentOrder(state),
     orders: getOrders(state),
     status: getStatus(state),
-    history: getHistory(state)
+    history: getHistory(state),
+
   };
 };
 

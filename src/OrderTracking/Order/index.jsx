@@ -3,10 +3,6 @@ import './order.css';
 
  
 export default class Order extends React.Component {
-     constructor(props) {
-        super(props);
-    }
- 
     render() {
         let {id, destination, event_name, name, sent_at_second } = this.props
         return (
