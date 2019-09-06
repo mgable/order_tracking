@@ -6,7 +6,7 @@ export default class Order extends React.Component {
     render() {
         let {id, destination, event_name, name, sent_at_second } = this.props
         return (
-           <div className="order">
+           <div className="order" key={id}>
             <div>Order ID:  <span>{id}</span></div>
             <div>Name: <span>{name}</span></div>
             <div>Desintation: <span>{destination}</span></div>

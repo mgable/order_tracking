@@ -2,7 +2,8 @@ import {
 	ORDER_RECEIVED,
 	CANCELLED,
 	DELIVERED,
-	STATUS_RECEIVED
+	STATUS_RECEIVED,
+	RESET_ORDER
 } from './types';
 
 import { simulationStopped } from '../config';
@@ -21,10 +22,22 @@ const Orders = (state = initial, action) => {
 			return orderReceived(state, action);
 		case STATUS_RECEIVED:
 			return setStatus(state, action)
+		case RESET_ORDER:
+			return reset(state, action);
 		default:
 			return state;
 	}
 };
+
+const reset = (state, action) => {
+	return Object.assign({}, {
+		raw:[],
+		orders: {},
+		history: {},
+		currentOrder: null,
+		status: simulationStopped
+	});
+}
 
 const setStatus = (state, action) => {
 	let status = action.status;
@@ -44,6 +57,7 @@ const cancelOrder = (state, action) => {
 }
 
 const addOrder = (state, action) => {
+	console.info("initial", initial);
 	let currentOrder = action.order;
 	if (currentOrder.id) {
 		state.orders[currentOrder.id] = currentOrder

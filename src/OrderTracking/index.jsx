@@ -1,8 +1,8 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 import { connect } from 'react-redux';
 import { Socket, Event } from 'react-socket-io';
 import Order from './Order';
-import { orderRecevied, statusReceived, statusCodes, DELIVERED, CANCELLED, CREATED, COOKED } from './types';
+import { orderRecevied, statusReceived, DELIVERED, CANCELLED, CREATED, COOKED, activeClass, resetOrder } from './types';
 import  * as config  from '../config';
 import { Button } from 'react-bootstrap';
 import { DropDown  } from './shared/dropDown';
@@ -21,35 +21,41 @@ class Orders extends React.Component {
 		this.onSetSelected = this.onSetSelected.bind(this)
 	}
 
+	formatOrders(orders, type) {
+		for (let id in orders){
+			let order = orders[id];
+			if (order.id){
+				type.push(<Order key={id} {...order} />);
+			}
+		}
+	}
+
 	UNSAFE_componentWillUpdate() {
 		let orders = this.props.orders,
 		history = this.props.history;
 
+
+    console.info("the history", this.props.history);
+
 		this.orders = [];
-		this.history = []
+		this.history = [];
 
 		if (this.state.activeFilter) {
 			orders = filter(orders, this.state.activeFilter)
+			this.activeStatus = <span>orders ({getLength(this.props.orders) || 0} / {getLength(orders) || 0})</span>
+		} else {
+			this.activeStatus = <span>orders {getLength(orders) || 0}</span>
 		}
 
 		if (this.state.historyFilter){
 			history = filter(history, this.state.historyFilter);
+			this.historyStatus = <span>orders (<span title='visible'>{getLength(this.props.history) || 0}</span> / <span title="total">{getLength(history) || 0}</span>)</span>
+		} else {
+			this.historyStatus = <span>orders {getLength(history) || 0}</span>
 		}
 
-		for (let id in orders){
-			let order = orders[id];
-			if (order.id){
-				this.orders.push(<Order key={id} {...order} />);
-			}
-		}
-
-		for (let id in history){
-			let order = history[id];
-			if (order.id){
-				this.history.push(<Order key={id} {...order} />)
-			}
-		}
-
+		this.formatOrders(orders, this.orders);
+		this.formatOrders(history, this.history);
 	
 		if (!this.orders.length){
 			this.orders = <p>There are no orders</p>
@@ -58,11 +64,18 @@ class Orders extends React.Component {
 		if (!this.history.length){
 			this.history = <p>There is no history</p>
 		}
+    console.info("hello!!!");
 	}
 
 	onStartSimulation(){
+    this.orders = [];
+    this.history = [];
+
 		var socket = window.io(uri);
+    this.props.handleReset();
 		socket.emit(config.systemMessage, "start");
+    this.render()
+    console.info('RESET!!!!');
 	}
  
 	onOrderMessage(order) {
@@ -74,7 +87,7 @@ class Orders extends React.Component {
 	}
 
 	onSetSelected(evt, filter) {
-		let isActive = evt.target.classList.contains('active');
+		let isActive = evt.target.classList.contains(activeClass);
 		if (isActive){
 		if (this.state[filter] !== evt.target.text){
 			this.setState({[filter]: evt.target.text})
@@ -85,6 +98,7 @@ class Orders extends React.Component {
 	}
  
 	render() {
+    console.info("fucking render", this.history);
 		return (
 			<div className="order-tracking container">
 				<Socket uri={uri} options={options}> 
@@ -102,8 +116,7 @@ class Orders extends React.Component {
 					<div className="col-sm-6 border col">
 						<div className="status-bar">
 							<h3>Orders</h3>
-							<span>active orders {this.orders.length || 0}</span>
-
+							{this.activeStatus}
 							<DropDown props={ {id: "activeOrdersID", items: [CREATED, COOKED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt,'activeFilter') }} />
 
 						</div>
@@ -112,8 +125,7 @@ class Orders extends React.Component {
 					<div className="col-sm-6 border col">
 						<div className="status-bar">
 							<h3>History</h3>
-							<span>completed orders {this.history.length || 0}</span>
-
+							{this.historyStatus}
 							<DropDown props={ {id: "completedOrdersID", items: [CANCELLED, DELIVERED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt,'historyFilter') }} />
 						</div>
 						{this.history}
@@ -122,6 +134,10 @@ class Orders extends React.Component {
 			</div>
 	  	);
 	}
+}
+
+const getLength = obj => {
+	return Object.keys(obj).length
 }
 
 const filter = (orders, filterBy) => {
@@ -139,7 +155,7 @@ const filter = (orders, filterBy) => {
 const getCurrentOrder = state => state.currentOrder;
 const getOrders = state => state.orders;
 const getStatus = state => state.status;
-const getHistory = state => state.history;
+const getHistory = state => {console.info(state);return state.history;}
 
 const mapStateToProps = state => {
   return {
@@ -153,12 +169,15 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-	handleOrderReceived: order => {
-	  dispatch(orderRecevied(order));
-	},
-	handleStatusReceived: status => {
-	  dispatch(statusReceived(status))
-	}
+  	handleOrderReceived: order => {
+  	  dispatch(orderRecevied(order));
+  	},
+  	handleStatusReceived: status => {
+  	  dispatch(statusReceived(status))
+  	},
+    handleReset: () => {
+      dispatch(resetOrder())
+    }
   };
 };
 
