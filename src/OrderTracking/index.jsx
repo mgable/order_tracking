@@ -4,6 +4,7 @@ import { Socket, Event } from 'react-socket-io';
 import Order from './Order';
 import { orderRecevied, statusReceived, DELIVERED, CANCELLED, CREATED, COOKED, activeClass, resetOrder } from './types';
 import  * as config  from '../config';
+
 import { Button } from 'react-bootstrap';
 import { DropDown  } from './shared/dropDown';
 import './orderTracking.scss';
@@ -15,67 +16,64 @@ const options = config.options;
 class Orders extends React.Component {
 	 constructor(props) {
 		super(props);
-		this.state = {activeFilter: null, historyFilter: null};
-		this.orders = [];
-		this.history = []
-		this.onSetSelected = this.onSetSelected.bind(this)
+
+    this.formattedHistory = <p>There is no history</p>
+    this.formattedOrders = <p>There are no orders</p>
+
+		this.state = {currentOrder: null, activeFilter: null, historyFilter: null, orders: this.formattedOrders, history: this.formattedHistory};
+		this.onSetSelected = this.onSetSelected.bind(this);
 	}
 
-	formatOrders(orders, type) {
+  componentDidMount(){
+    let socket = window.io(uri);
+    socket.on(config.orderMessage, this.onOrderMessage.bind(this));
+    socket.on(config.systemMessage, this.onSystemMessage.bind(this));
+  }
+
+	format(orders) {
+    let results = []
 		for (let id in orders){
 			let order = orders[id];
 			if (order.id){
-				type.push(<Order key={id} {...order} />);
+				results.push(<Order key={id} {...order} />);
 			}
 		}
+
+    return results
 	}
 
-	UNSAFE_componentWillUpdate() {
-		let orders = this.props.orders,
-		history = this.props.history;
+  componentDidUpdate(prevProps, prevState) {
+		let { orders, history, currentOrder } = this.props;
+
+    if ( (currentOrder !== prevState.currentOrder) || (this.state.activeFilter !== prevState.activeFilter) || (this.state.historyFilter !== prevState.historyFilter) ){
+
+  		if (this.state.activeFilter) {
+  			orders = filter(orders, this.state.activeFilter);
+  			this.activeStatus = <span>orders ({getLength(this.props.orders) || 0} / {getLength(orders) || 0})</span>
+  		} else {
+  			this.activeStatus = <span>orders {getLength(orders) || 0}</span>
+  		}
+
+  		if (this.state.historyFilter){
+  			history = filter(history, this.state.historyFilter);
+  			this.historyStatus = <span>orders (<span title='visible'>{getLength(this.props.history) || 0}</span> / <span title="total">{getLength(history) || 0}</span>)</span>
+  		} else {
+  			this.historyStatus = <span>orders {getLength(history) || 0}</span>
+  		}
+
+  		let formattedOrders = this.format(orders),
+  		  formattedHistory = this.format(history);
 
 
-    console.info("the history", this.props.history);
+      this.setState({orders: formattedOrders, currentOrder, history:formattedHistory}) 
 
-		this.orders = [];
-		this.history = [];
-
-		if (this.state.activeFilter) {
-			orders = filter(orders, this.state.activeFilter)
-			this.activeStatus = <span>orders ({getLength(this.props.orders) || 0} / {getLength(orders) || 0})</span>
-		} else {
-			this.activeStatus = <span>orders {getLength(orders) || 0}</span>
-		}
-
-		if (this.state.historyFilter){
-			history = filter(history, this.state.historyFilter);
-			this.historyStatus = <span>orders (<span title='visible'>{getLength(this.props.history) || 0}</span> / <span title="total">{getLength(history) || 0}</span>)</span>
-		} else {
-			this.historyStatus = <span>orders {getLength(history) || 0}</span>
-		}
-
-		this.formatOrders(orders, this.orders);
-		this.formatOrders(history, this.history);
-	
-		if (!this.orders.length){
-			this.orders = <p>There are no orders</p>
-		} 
-
-		if (!this.history.length){
-			this.history = <p>There is no history</p>
-		}
-    console.info("hello!!!");
+    }
 	}
 
 	onStartSimulation(){
-    this.orders = [];
-    this.history = [];
-
 		var socket = window.io(uri);
     this.props.handleReset();
 		socket.emit(config.systemMessage, "start");
-    this.render()
-    console.info('RESET!!!!');
 	}
  
 	onOrderMessage(order) {
@@ -98,15 +96,8 @@ class Orders extends React.Component {
 	}
  
 	render() {
-    console.info("fucking render", this.history);
 		return (
 			<div className="order-tracking container">
-				<Socket uri={uri} options={options}> 
-					<Event event={config.orderMessage} handler={this.onOrderMessage.bind(this)} />
-				</Socket>
-				<Socket uri={uri} options={options}> 
-					<Event event={config.systemMessage} handler={this.onSystemMessage.bind(this)} />
-				</Socket>
 				<div>
 					<Button className="status-button" onClick={this.onStartSimulation.bind(this)}>start</Button>
 					<span>status: {this.props.status}</span>
@@ -120,7 +111,7 @@ class Orders extends React.Component {
 							<DropDown props={ {id: "activeOrdersID", items: [CREATED, COOKED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt,'activeFilter') }} />
 
 						</div>
-						{this.orders}
+						{this.state.orders}
 					</div>
 					<div className="col-sm-6 border col">
 						<div className="status-bar">
@@ -128,12 +119,16 @@ class Orders extends React.Component {
 							{this.historyStatus}
 							<DropDown props={ {id: "completedOrdersID", items: [CANCELLED, DELIVERED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt,'historyFilter') }} />
 						</div>
-						{this.history}
+						{this.state.history}
 				  </div>
 				</div>
 			</div>
 	  	);
 	}
+}
+
+const hasOrders = orders => {
+  return Object.keys(orders).length
 }
 
 const getLength = obj => {
@@ -143,10 +138,10 @@ const getLength = obj => {
 const filter = (orders, filterBy) => {
   let results = {}
   for (let id in orders){
-	let order = orders[id];
-	if (order.event_name === filterBy){
-	  results[id] = order
-	}
+  	let order = orders[id];
+  	if (order.event_name === filterBy){
+  	  results[id] = order
+  	}
   }
 
   return results;
@@ -155,7 +150,7 @@ const filter = (orders, filterBy) => {
 const getCurrentOrder = state => state.currentOrder;
 const getOrders = state => state.orders;
 const getStatus = state => state.status;
-const getHistory = state => {console.info(state);return state.history;}
+const getHistory = state => state.history;
 
 const mapStateToProps = state => {
   return {

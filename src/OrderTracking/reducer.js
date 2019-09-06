@@ -57,7 +57,6 @@ const cancelOrder = (state, action) => {
 }
 
 const addOrder = (state, action) => {
-	console.info("initial", initial);
 	let currentOrder = action.order;
 	if (currentOrder.id) {
 		state.orders[currentOrder.id] = currentOrder
