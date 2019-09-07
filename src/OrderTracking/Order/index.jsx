@@ -1,7 +1,7 @@
 import React from 'react';
 import './order.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import faTimesCircle from '@fortawesome/fontawesome-free-solid/faTimesCircle';
+import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
 
 const Order = (props) => {
     let {id, destination, event_name, name, sent_at_second, onCancelOrder } = props;        
