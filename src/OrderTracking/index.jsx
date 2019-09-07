@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Order from './Order';
-import { orderRecevied, statusReceived, activeClass, resetOrder, setTime } from './types';
+import { orderRecevied, statusReceived, activeClass, resetOrder, setTime, setCookThreshold } from './types';
 import  * as config  from '../config'; 
 import { DELIVERED, CANCELLED, CREATED, COOKED } from '../config'; 
-
+import TimeThreshold from './shared/timeThreshold';
 import { Button } from 'react-bootstrap';
 import { DropDown  } from './shared/dropDown';
 import './orderTracking.scss';
@@ -19,7 +19,14 @@ class Orders extends React.Component {
 		this.formattedOrders = <p>There are no orders</p>
 		this.state = {currentOrder: null, activeFilter: null, historyFilter: null, orders: this.formattedOrders, history: this.formattedHistory};
 		this.onSetSelected = this.onSetSelected.bind(this);
-		this.onCancelOrder = this.onCancelOrder.bind(this)
+		this.onCancelOrder = this.onCancelOrder.bind(this);
+
+		this.filters = {
+			DELIVERED: filter,
+			CANCELLED: filter,
+			CREATED: filter,
+			COOKED: (orders, filterBy) => advancedFilter(orders, filterBy, (this.props.time - this.props.threshold)) // time = curerent time - thresold)
+		};
 	}
 
 	componentDidMount(){
@@ -51,14 +58,14 @@ class Orders extends React.Component {
 		if ( (currentOrder !== prevState.currentOrder) || (this.state.activeFilter !== prevState.activeFilter) || (this.state.historyFilter !== prevState.historyFilter) ){
 
 			if (this.state.activeFilter) {
-				orders = filter(orders, this.state.activeFilter);
+				orders = this.filters[this.state.activeFilter](orders, this.state.activeFilter);
 				this.activeStatus = <span>orders (<span title='total'>{getLength(this.props.orders) || 0})</span> / <span title="visible">({getLength(orders) || 0}</span>)</span>
 			} else {
 				this.activeStatus = <span>orders {getLength(orders) || 0}</span>
 			}
 
 			if (this.state.historyFilter){
-				history = filter(history, this.state.historyFilter);
+				history = this.filters[this.state.historyFilter](history, this.state.historyFilter);
 				this.historyStatus = <span>orders (<span title='total'>{getLength(this.props.history) || 0}</span> / <span title="visible">{getLength(history) || 0}</span>)</span>
 			} else {
 				this.historyStatus = <span>orders {getLength(history) || 0}</span>
@@ -90,27 +97,35 @@ class Orders extends React.Component {
 	}
 
 	onSystemMessage(status){
-		this.props.handleStatusReceived(status)
+		this.props.handleStatusReceived(status);
+	}
+
+	onSetCookThreshold(evt) {
+		let threshold = evt.target.value;
+		this.props.handleSetCookThreshold(threshold);
 	}
 
 	onSetSelected(evt, filter) {
 		let isActive = evt.target.classList.contains(activeClass);
 		if (isActive){
 			if (this.state[filter] !== evt.target.text){
-				this.setState({[filter]: evt.target.text})
+				this.setState({[filter]: evt.target.text});
 			}
 		} else {
-			this.setState({[filter]: null})
+			this.setState({[filter]: null});
 		}
 	}
  
 	render() {
 		return (
 			<div className="order-tracking container">
-				<div>
+				<header>
 					<Button className="status-button" onClick={this.onStartSimulation.bind(this)}>start</Button>
 					<span>status: {this.props.status}</span>
-				</div>
+
+					<TimeThreshold label={"cook threshold"} handleOnChange={this.onSetCookThreshold.bind(this)}/>
+
+				</header>
 
 				<div className="row panel">
 					<div className="col-sm-6 border col active">
@@ -153,11 +168,12 @@ const filter = (orders, filterBy) => {
 	return results;
 }
 
-const advanceFilter = (orders, filterBy, time) => { // time = curerent time - thresold
+const advancedFilter = (orders, filterBy, time) => { // time = curerent time - thresold
+	console.info("the time", time)
 	let results = {}
 	for (var id in orders){
 		let order = orders[id];
-		if (order.event_name === filterBy && order.sent_at_second < time){
+		if (order.event_name === filterBy && order.sent_at_second > time){
 			results[id] = order
 		}
 	}
@@ -169,13 +185,17 @@ const getCurrentOrder = state => state.currentOrder;
 const getOrders = state => state.orders;
 const getStatus = state => state.status;
 const getHistory = state => state.history;
+const getTime = state => state.time;
+const getThreshold = state => state.threshold;
 
 const mapStateToProps = state => {
 	return {
 		currentOrder: getCurrentOrder(state),
 		orders: getOrders(state),
 		status: getStatus(state),
-		history: getHistory(state)
+		history: getHistory(state),
+		time: getTime(state),
+		threshold: getThreshold(state)
 	};
 };
 
@@ -192,6 +212,9 @@ const mapDispatchToProps = dispatch => {
 		},
 		handleTime: time => {
 			dispatch(setTime(time))
+		},
+		handleSetCookThreshold: threshold => {
+			dispatch(setCookThreshold(threshold))
 		}
 	};
 };

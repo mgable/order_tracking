@@ -1,8 +1,25 @@
 .order-tracking {
-	.status-button {
-		margin: 0 10px 0 0;
+
+	header {
+		.status-button {
+			margin: 0 10px 0 0;
+		}
+		.time-threshold {
+			form {
+				float: right;
+				width: auto;
+				display: inline;
+				select {
+					margin: 0 0 0 10px;
+					width: auto;
+					display: inline;
+				}
+			}
+		}
 	}
+
 	.panel {
+		clear: both;
 		margin: 20px 0 0 0;
 	}
 
@@ -14,6 +31,7 @@
 		align-items: center;
 		padding: 10px;
 	}
+
 	.history {
 		.order {
 			.cancel {

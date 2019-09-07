@@ -4,53 +4,57 @@ import {
 	DELIVERED,
 	STATUS_RECEIVED,
 	RESET_ORDER,
-	TIME_RECEIVED
+	TIME_RECEIVED,
+	SET_THRESHOLD
 } from './types';
 
-import { simulationStopped } from '../config';
+import { simulationStopped, defaultThreshold } from '../config';
 
-const initial = {
+const initialState = {
 	raw:[],
 	orders: {},
 	history: {},
 	currentOrder: null,
 	status: simulationStopped,
-	time: null
+	time: null,
+	threshold: defaultThreshold
 };
 
-const Orders = (state = initial, action) => {
+const Orders = (state = initialState, action) => {
+	console.info(initialState)
 	switch (action.type) {
 		case ORDER_RECEIVED:
 			return orderReceived(state, action);
 		case STATUS_RECEIVED:
 			return setStatus(state, action)
 		case RESET_ORDER:
-			return reset(state, action);
+			return initialState;
 		case TIME_RECEIVED:
 			return setTime(state, action);
+		case SET_THRESHOLD:
+			return setThreshold(state, action);
 		default:
 			return state;
 	}
 };
 
-const setTime = (state, action) => {
-	let time = action.time;
-	if (state.time !== time){
-		console.info("time is now", time)
-		return Object.assign({}, state, {time});
+const setThreshold = (state, action) => {
+	let threshold = action.threshold;
+
+	if (state.threshold !== threshold){
+		return Object.assign({}, state, {threshold});
 	}
 
 	return state;
 }
+ 
+const setTime = (state, action) => {
+	let time = action.time.time;
+	if (state.time !== time){
+		return Object.assign({}, state, {time});
+	}
 
-const reset = (state, action) => {
-	return Object.assign({}, {
-		raw:[],
-		orders: {},
-		history: {},
-		currentOrder: null,
-		status: simulationStopped
-	});
+	return state;
 }
 
 const setStatus = (state, action) => {
@@ -64,18 +68,24 @@ const setStatus = (state, action) => {
 
 const cancelOrder = (state, action) => {
 	let currentOrder = action.order,
-		id = currentOrder.id;
-	state.history[id] = currentOrder;
+		id = currentOrder.id,
+		history = Object.assign({}, state.history)
+
+	history[id] = currentOrder;
+
 	delete state.orders[id];
-	return Object.assign({}, state, {currentOrder})
+	return Object.assign({}, state, {currentOrder, history})
 }
 
 const addOrder = (state, action) => {
 	let currentOrder = action.order;
 	if (currentOrder.id) {
-		state.orders[currentOrder.id] = currentOrder
-		state.raw.push(currentOrder);
-		return Object.assign({}, state, {currentOrder});
+		let raw = state.raw.slice(0),
+			orders = Object.assign({}, state.orders);
+
+		orders[currentOrder.id] = currentOrder;
+		raw.push(currentOrder);
+		return Object.assign({}, state, {currentOrder, orders, raw});
 	}
 
 	return state;
