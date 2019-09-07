@@ -8,6 +8,12 @@ const simulationStarted = "Simulation Started";
 const simulationCompleted = "Simulation Completed";
 const simulationStopped = "Simulation Stopped";
 
+const CREATED = 'CREATED';
+const COOKED = 'COOKED';
+const DRIVER_RECEIVED = 'DRIVER_RECEIVED';
+const DELIVERED = 'DELIVERED';
+const CANCELLED = 'CANCELLED';
+
 module.exports.port = port;
 module.exports.socketServer = `${socketServer}:${port}`;
 module.exports.options = options;
@@ -16,3 +22,4 @@ module.exports.systemMessage = systemMessage;
 module.exports.simulationStarted = simulationStarted;
 module.exports.simulationCompleted = simulationCompleted;
 module.exports.simulationStopped = simulationStopped;
+module.exports.CANCELLED = CANCELLED;

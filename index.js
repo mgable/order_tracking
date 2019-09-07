@@ -5,6 +5,7 @@ var config = require('./src/config'),
 	port = config.port || 8000, 
 	fs = require('fs'),
 	 _ = require('underscore'),
+	 cancelledOrders = {},
 	 contentSorted;
 
 try {
@@ -16,9 +17,7 @@ try {
 	throw new Error("There was an error parsing the data: " + e)
 }
 
-/*app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
-});*/
+var time = 0;
 
 io.on('connection', (socket) => {
 	var cancel;
@@ -27,8 +26,7 @@ io.on('connection', (socket) => {
 		if (msg === "start"){
 			io.emit(config.systemMessage, config.simulationStarted );
 			console.log(config.simulationStarted)
-			let time = 0,
-				itemCount = 0,
+			var itemCount = 0,
 				totalItems = contentSorted.length;
 			cancel = setInterval(() => {
 				let results = _.where(contentSorted, {sent_at_second: time});
@@ -50,7 +48,23 @@ io.on('connection', (socket) => {
 			console.log(config.simulationStopped)
 		}
 	});
+
+	socket.on(config.orderMessage, (msg, orderID) => {
+		console.info(msg, orderID);
+		if (msg === "cancel" && orderID){
+			removeFromFeed(orderID);
+		}
+	});
 });
+
+
+const removeFromFeed = (id) => {
+	let item = _.findWhere(contentSorted, {id});
+	console.info("the item", item);
+	item.event_name = config.CANCELLED;
+	contentSorted = contentSorted.filter((item) => { item.id !== id})
+	io.emit(config.orderMessage, item);
+}
 
 http.listen(port, () => {
   console.log('listening on *:' + port);

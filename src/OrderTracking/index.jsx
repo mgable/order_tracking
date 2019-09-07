@@ -70,6 +70,10 @@ class Orders extends React.Component {
 		this.socket.emit(config.systemMessage, "start");
 	}
 
+	onCancelOrder(id) {
+		this.socket.emit(config.orderMessage, "cancel", "4b76edbf");
+	}
+
 	onOrderMessage(order) {
 		this.props.handleOrderReceived(order);
 	}
@@ -93,6 +97,7 @@ class Orders extends React.Component {
 		return (
 			<div className="order-tracking container">
 				<div>
+					<Button onClick={this.onCancelOrder.bind(this)}>Cancel</Button>
 					<Button className="status-button" onClick={this.onStartSimulation.bind(this)}>start</Button>
 					<span>status: {this.props.status}</span>
 				</div>
