@@ -1,8 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Order from './Order';
-import { orderRecevied, statusReceived, DELIVERED, CANCELLED, CREATED, COOKED, activeClass, resetOrder } from './types';
-import  * as config  from '../config';
+import { orderRecevied, statusReceived, activeClass, resetOrder } from './types';
+import  * as config  from '../config'; 
+import { DELIVERED, CANCELLED, CREATED, COOKED } from '../config'; 
 
 import { Button } from 'react-bootstrap';
 import { DropDown  } from './shared/dropDown';
@@ -18,6 +19,7 @@ class Orders extends React.Component {
 		this.formattedOrders = <p>There are no orders</p>
 		this.state = {currentOrder: null, activeFilter: null, historyFilter: null, orders: this.formattedOrders, history: this.formattedHistory};
 		this.onSetSelected = this.onSetSelected.bind(this);
+		this.onCancelOrder = this.onCancelOrder.bind(this)
 	}
 
 	componentDidMount(){
@@ -31,7 +33,7 @@ class Orders extends React.Component {
 		for (var id in orders){
 			let order = orders[id];
 			if (order.id){
-				results.push(<Order key={id} {...order} />);
+				results.push(<Order key={id} {...order } onCancelOrder={this.onCancelOrder} />);
 			}
 		}
 
@@ -67,11 +69,11 @@ class Orders extends React.Component {
 
 	onStartSimulation(){
 		this.props.handleReset();
-		this.socket.emit(config.systemMessage, "start");
+		this.socket.emit(config.systemMessage, config.start);
 	}
 
 	onCancelOrder(id) {
-		this.socket.emit(config.orderMessage, "cancel", "4b76edbf");
+		this.socket.emit(config.orderMessage, config.cancel, id);
 	}
 
 	onOrderMessage(order) {
@@ -97,13 +99,12 @@ class Orders extends React.Component {
 		return (
 			<div className="order-tracking container">
 				<div>
-					<Button onClick={this.onCancelOrder.bind(this)}>Cancel</Button>
 					<Button className="status-button" onClick={this.onStartSimulation.bind(this)}>start</Button>
 					<span>status: {this.props.status}</span>
 				</div>
 
 				<div className="row panel">
-					<div className="col-sm-6 border col">
+					<div className="col-sm-6 border col active">
 						<div className="status-bar">
 							<h3>Orders</h3>
 							{this.activeStatus}
@@ -112,7 +113,7 @@ class Orders extends React.Component {
 						</div>
 						{this.state.orders}
 					</div>
-					<div className="col-sm-6 border col">
+					<div className="col-sm-6 border col history">
 						<div className="status-bar">
 							<h3>History</h3>
 							{this.historyStatus}

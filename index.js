@@ -17,13 +17,16 @@ try {
 	throw new Error("There was an error parsing the data: " + e)
 }
 
+console.info("the config", config)
+
 var time = 0;
 
 io.on('connection', (socket) => {
 	var cancel;
 	socket.on(config.systemMessage, (msg) => {
 		console.info("I recieved a message", msg);
-		if (msg === "start"){
+		time = 0;
+		if (msg === config.start){
 			io.emit(config.systemMessage, config.simulationStarted );
 			console.log(config.simulationStarted)
 			var itemCount = 0,
@@ -42,7 +45,7 @@ io.on('connection', (socket) => {
 						console.log(config.simulationCompleted)
 					}
 			}, 1000);
-		} else if (msg === "stop"){
+		} else if (msg === connfig.stop){
 			clearInterval(cancel);
 			io.emit(config.systemMessage, config.simulationStopped );
 			console.log(config.simulationStopped)
@@ -51,7 +54,7 @@ io.on('connection', (socket) => {
 
 	socket.on(config.orderMessage, (msg, orderID) => {
 		console.info(msg, orderID);
-		if (msg === "cancel" && orderID){
+		if (msg === config.cancel && orderID){
 			removeFromFeed(orderID);
 		}
 	});
@@ -61,9 +64,13 @@ io.on('connection', (socket) => {
 const removeFromFeed = (id) => {
 	let item = _.findWhere(contentSorted, {id});
 	console.info("the item", item);
-	item.event_name = config.CANCELLED;
-	contentSorted = contentSorted.filter((item) => { item.id !== id})
-	io.emit(config.orderMessage, item);
+	if (item){
+		item.event_name = config.CANCELLED;
+		contentSorted = contentSorted.filter((item) => item.id !== id)
+		io.emit(config.orderMessage, item);
+	} else {
+		throw new Error ("Can not find the item to cancel. Perhaps it was already delivered or cancelled")
+	}
 }
 
 http.listen(port, () => {

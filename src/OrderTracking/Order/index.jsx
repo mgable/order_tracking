@@ -1,11 +1,13 @@
 import React from 'react';
 import './order.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import faTimesCircle from '@fortawesome/fontawesome-free-solid/faTimesCircle';
 
 const Order = (props) => {
-    let {id, destination, event_name, name, sent_at_second } = props;        
+    let {id, destination, event_name, name, sent_at_second, onCancelOrder } = props;        
     return (
        <div className="order" key={id}>
-        <div>Order ID:  <span>{id}</span></div>
+        <div>Order ID:  <span>{id}</span><span onClick={() => onCancelOrder(id) } className='cancel'>&nbsp;<FontAwesomeIcon icon={faTimesCircle} /></span></div>
         <div>Name: <span>{name}</span></div>
         <div>Desintation: <span>{destination}</span></div>
         <div>Event: <span>{event_name}</span></div>
@@ -14,6 +16,5 @@ const Order = (props) => {
     );
   
 }
-
 
 export default  Order;
