@@ -37,7 +37,11 @@ class Orders extends React.Component {
 			}
 		}
 
-		return results;
+		return this.sort(results);
+	}
+
+	sort(orders) {
+		return orders.sort((order1, order2) => order1.props.sent_at_second < order2.props.sent_at_second ? 1 : -1)
 	}
 
 	componentDidUpdate(prevProps, prevState) {

@@ -17,8 +17,6 @@ try {
 	throw new Error("There was an error parsing the data: " + e)
 }
 
-console.info("the config", config)
-
 var time = 0;
 
 io.on('connection', (socket) => {
@@ -35,7 +33,6 @@ io.on('connection', (socket) => {
 				let results = _.where(contentSorted, {sent_at_second: time});
 					_.forEach(results, (result) => {
 						io.emit(config.orderMessage, result);
-						console.info("result.event_name ", result.event_name)
 						itemCount++
 					});
 					time++;
