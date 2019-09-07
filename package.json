@@ -24,7 +24,7 @@
     },
     "scripts": {
         "start": "npm-run-all -p watch-css start-js start_nodemon",
-        "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
+        "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive --skip-initial",
         "build-css": "node-sass-chokidar src/ -o src/",
         "start-js": "react-scripts start",
         "build": "react-scripts build",
@@ -60,33 +60,5 @@
             "last 1 firefox version",
             "last 1 safari version"
         ]
-    },
-    "babel": {
-        "presets": [
-            "@babel/preset-env",
-            "@babel/preset-react"
-        ],
-        "plugins": [
-            "syntax-class-properties",
-            "transform-class-properties",
-            "transform-require-context"
-        ]
-    },
-    "jest": {
-        "setupFiles": [
-            "<rootDir>/setupTests.js"
-        ],
-        "moduleNameMapper": {
-            "^.+\\.(css|less|svg|png|gif|scss)$": "<rootDir>/stub.js"
-        },
-        "testPathIgnorePatterns": [
-            "/node_modules/"
-        ],
-        "snapshotSerializers": [
-            "enzyme-to-json/serializer"
-        ],
-        "verbose": true,
-        "modulePathIgnorePatterns": [],
-        "unmockedModulePathPatterns": []
     }
 }
