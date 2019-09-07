@@ -3,7 +3,8 @@ import {
 	CANCELLED,
 	DELIVERED,
 	STATUS_RECEIVED,
-	RESET_ORDER
+	RESET_ORDER,
+	TIME_RECEIVED
 } from './types';
 
 import { simulationStopped } from '../config';
@@ -13,7 +14,8 @@ const initial = {
 	orders: {},
 	history: {},
 	currentOrder: null,
-	status: simulationStopped
+	status: simulationStopped,
+	time: null
 };
 
 const Orders = (state = initial, action) => {
@@ -24,10 +26,22 @@ const Orders = (state = initial, action) => {
 			return setStatus(state, action)
 		case RESET_ORDER:
 			return reset(state, action);
+		case TIME_RECEIVED:
+			return setTime(state, action);
 		default:
 			return state;
 	}
 };
+
+const setTime = (state, action) => {
+	let time = action.time;
+	if (state.time !== time){
+		console.info("time is now", time)
+		return Object.assign({}, state, {time});
+	}
+
+	return state;
+}
 
 const reset = (state, action) => {
 	return Object.assign({}, {

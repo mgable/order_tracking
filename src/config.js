@@ -3,6 +3,7 @@ const socketServer = "http://localhost";
 const options = { transports: ['websocket'] };
 const orderMessage = "order-message";
 const systemMessage = "system-message";
+const timeMessage = "time-message";
 
 const simulationStarted = "Simulation Started";
 const simulationCompleted = "Simulation Completed";
@@ -23,6 +24,7 @@ module.exports.socketServer = `${socketServer}:${port}`;
 module.exports.options = options;
 module.exports.orderMessage = orderMessage;
 module.exports.systemMessage = systemMessage;
+module.exports.timeMessage = timeMessage;
 module.exports.simulationStarted = simulationStarted;
 module.exports.simulationCompleted = simulationCompleted;
 module.exports.simulationStopped = simulationStopped;

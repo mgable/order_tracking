@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Order from './Order';
-import { orderRecevied, statusReceived, activeClass, resetOrder } from './types';
+import { orderRecevied, statusReceived, activeClass, resetOrder, setTime } from './types';
 import  * as config  from '../config'; 
 import { DELIVERED, CANCELLED, CREATED, COOKED } from '../config'; 
 
@@ -26,6 +26,7 @@ class Orders extends React.Component {
 		this.socket = window.io(uri);
 		this.socket.on(config.orderMessage, this.onOrderMessage.bind(this));
 		this.socket.on(config.systemMessage, this.onSystemMessage.bind(this));
+		this.socket.on(config.timeMessage, this.onTimeMessage.bind(this));
 	}
 
 	format(orders) {
@@ -78,6 +79,10 @@ class Orders extends React.Component {
 
 	onCancelOrder(id) {
 		this.socket.emit(config.orderMessage, config.cancel, id);
+	}
+
+	onTimeMessage(time){
+		this.props.handleTime(time);
 	}
 
 	onOrderMessage(order) {
@@ -133,7 +138,7 @@ class Orders extends React.Component {
 
 
 const getLength = obj => {
-	return Object.keys(obj).length
+	return Object.keys(obj).length;
 }
 
 const filter = (orders, filterBy) => {
@@ -143,9 +148,21 @@ const filter = (orders, filterBy) => {
 		if (order.event_name === filterBy){
 			results[id] = order
 		}
-  }
+	}
 
-  return results;
+	return results;
+}
+
+const advanceFilter = (orders, filterBy, time) => { // time = curerent time - thresold
+	let results = {}
+	for (var id in orders){
+		let order = orders[id];
+		if (order.event_name === filterBy && order.sent_at_second < time){
+			results[id] = order
+		}
+	}
+
+	return results;
 }
 
 const getCurrentOrder = state => state.currentOrder;
@@ -172,6 +189,9 @@ const mapDispatchToProps = dispatch => {
 		},
 		handleReset: () => {
 			dispatch(resetOrder())
+		},
+		handleTime: time => {
+			dispatch(setTime(time))
 		}
 	};
 };

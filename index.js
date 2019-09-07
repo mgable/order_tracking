@@ -35,6 +35,7 @@ io.on('connection', (socket) => {
 						io.emit(config.orderMessage, result);
 						itemCount++
 					});
+					io.emit(config.timeMessage, {time});
 					time++;
 					if (itemCount === totalItems){
 						clearInterval(cancel);
