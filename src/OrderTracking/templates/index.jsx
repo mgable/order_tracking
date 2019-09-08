@@ -5,7 +5,6 @@ import { Button } from 'react-bootstrap';
 import TimeThreshold from '../shared/timeThreshold';
 import './orderTracking.scss';
 
-
 const Template = (props) => {
 	let { failed, reconnectionAttempts, onClick, status, serverStatus, onChange, orders, history } = props,
   		{ status: o_status, items: o_items, dropDownProps: o_dropDownProps} = orders,

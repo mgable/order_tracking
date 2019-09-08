@@ -9,9 +9,10 @@ var config = require('./src/config'),
 	 contentSorted;
 
 
-var time = 0;
-var currentContent = null;
+var time = 0; // server time in whole seconds
+var currentContent = null; // holder for data.json
 
+// fetch and parse data 
 const fetchtData = () => {
 	try {
 		contentRaw = fs.readFileSync('./data.json')
@@ -21,11 +22,10 @@ const fetchtData = () => {
 	}
 }
 
-
+// get copy of deata
 const getDataFn = (data) => {
 	return () => {
-		let contentJSON = JSON.parse(JSON.stringify(data));
-		return contentSorted = _.sortBy(contentJSON, "sent_at_second");
+		return JSON.parse(JSON.stringify(data)); // deep copy the data "for demostration purposes only"
 	}
 }
 
@@ -34,11 +34,9 @@ const getData = getDataFn(fetchtData())
 io.on('connection', (socket) => {
 	var cancel;
 	socket.on(config.systemMessage, (msg) => {
-		console.info("I recieved a message", msg);
 		time = 0;
 		if (msg === config.start){
 			io.emit(config.systemMessage, config.simulationStarted );
-			console.log(config.simulationStarted)
 			var itemCount = 0;
 
 			currentContent = getData();
@@ -58,7 +56,6 @@ io.on('connection', (socket) => {
 				if (itemCount >= currentContent.length){
 					clearInterval(cancel);
 					io.emit(config.systemMessage, config.simulationCompleted);
-					console.log(config.simulationCompleted)
 				}
 
 			}, 1000);
@@ -66,7 +63,6 @@ io.on('connection', (socket) => {
 		} else if (msg === connfig.stop){
 			clearInterval(cancel);
 			io.emit(config.systemMessage, config.simulationStopped );
-			console.log(config.simulationStopped)
 		}
 	});
 

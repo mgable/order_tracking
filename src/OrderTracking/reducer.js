@@ -1,7 +1,5 @@
 import {
 	ORDER_RECEIVED,
-	CANCELLED,
-	DELIVERED,
 	STATUS_RECEIVED,
 	RESET_ORDER,
 	TIME_RECEIVED,
@@ -9,16 +7,16 @@ import {
 	SET_SERVER_STATUS
 } from './types';
 
-import { simulationStopped, defaultThreshold, maxOrders } from '../config';
+import { simulationStopped, defaultThreshold, maxOrders, CANCELLED, DELIVERED } from '../config';
 
 const initialState = {
-	orders: {},
-	history: {},
-	currentOrder: null,
-	status: simulationStopped,
-	time: null,
-	threshold: defaultThreshold,
-	serverStatus: null
+	orders: {}, // all currently "active" orders by id
+	history: {}, // all "delivered" or "cancelled" orders
+	currentOrder: null, // last received order
+	status: simulationStopped, // simulation states
+	time: null, // server time in whole secondes
+	threshold: defaultThreshold, // "cooked" filter threshold time
+	serverStatus: null // server socket statuws
 };
 
 const Orders = (state = initialState, action) => {
@@ -26,7 +24,7 @@ const Orders = (state = initialState, action) => {
 		case ORDER_RECEIVED:
 			return orderReceived(state, action);
 		case STATUS_RECEIVED:
-			return setStatus(state, action);
+			return setSimulationStatus(state, action);
 		case RESET_ORDER:
 			return reset(state, action);
 		case TIME_RECEIVED:
@@ -45,7 +43,7 @@ const reset = (state, action) => {
 	return Object.assign({}, state, {orders: {}, history: {}, time: null, currentOrder: null, status: simulationStopped });
 }
 
-const  setServerStatus = (state, action) => {
+const setServerStatus = (state, action) => {
 	let serverStatus = action.status;
 
 	if (state.serverStatus !== serverStatus) {
@@ -68,17 +66,16 @@ const setThreshold = (state, action) => {
 const setTime = (state, action) => {
 	let time = action.time.time;
 	if (state.time !== time){
-		console.info(time)
 		return Object.assign({}, state, {time});
 	}
 
 	return state;
 }
 
-const setStatus = (state, action) => {
+const setSimulationStatus = (state, action) => {
 	let status = action.status;
 	if (state.status !== status){
-		return Object.assign({}, state, {status})
+		return Object.assign({}, state, {status});
 	}
 
 	return state;
@@ -92,7 +89,7 @@ const addToHistory = (state, action) => {
 
 	history[id] = currentOrder;
 
-	if (Object.keys(history).length >= maxOrders) { // do not let the object get too big
+	if (Object.keys(history).length >= maxOrders) { // do not let the history object get too big
 		let values = Object.values(history),
 			sortedValues = values.sort((v1, v2) => v1.sent_at_second > v2.sent_at_second ? 1 : -1),
 			lowestValue = sortedValues.pop(),

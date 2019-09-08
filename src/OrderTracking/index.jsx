@@ -1,35 +1,52 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Order from './Order';
-import { orderRecevied, statusReceived, activeClass, resetOrder, setTime, setCookThreshold, setServerStatus } from './types';
-import  * as config  from '../config'; 
+import { orderRecevied, statusReceived, activeClass, resetOrder, setTime, setCookThreshold, setServerStatus, historyFilter, activeFilter } from './types';
+import * as config  from '../config'; 
 import { DELIVERED, CANCELLED, CREATED, COOKED } from '../config'; 
 import Template from './templates';
 import {Template as ToolBar} from './templates/toolBar';
 
-const uri = config.socketServer;
-const options = config.options;
 
+/** public function
+ * @description  controller for Order tracking app
+ * @param { object }  orders  active orders indexed by id
+ * @param { object }  history  completed orders indexed by id
+ * @param { object }  currentOrder   last order recieved
+ * @param { string }  status   simulation status
+ * @param { string }  serverStatus   socket server status
+ * @param { int }  time   server time in whole seconds
+ * @param { int }  threshold   "cooked" filter time
+ * @return { template }  order tracking module
+ */
 class Orders extends React.Component {
 	 constructor(props) {
 		super(props);
 
-		this.formattedHistory = <p>There is no history</p>
-		this.formattedOrders = <p>There are no orders</p>
-		this.state = {currentOrder: null, activeFilter: null, historyFilter: null, orders: this.formattedOrders, history: this.formattedHistory};
+		// set state variables so page will render correctly
+		// currentOrder = props.currentOrder
+		// activeFilter = current filter for active orders: null || ENUM: "COOKED" or "CREATED"
+		// historyFilter = current filter for history: null || ENUM: "CANCELLED" or "DELIVERED"
+		// orders = array for active orders
+		// history = array for completed orders
+		this.state = {currentOrder: null, activeFilter: null, historyFilter: null, orders: [<p key="orders">There are no orders</p>], history:  [<p key="history">There is no history</p>]};
+		// set the selected filter
 		this.onSetSelected = this.onSetSelected.bind(this);
+		// cancel the order
 		this.onCancelOrder = this.onCancelOrder.bind(this);
-
+		// event types are filtered in different ways
 		this.filters = {
 			DELIVERED: filter,
 			CANCELLED: filter,
 			CREATED: filter,
+			// cooked event needs a lower time limit to filter on
 			COOKED: (orders, filterBy) => advancedFilter(orders, filterBy, (this.props.time - this.props.threshold)) // time = curerent time - thresold)
 		};
 	}
 
 	componentDidMount(){
-		this.socket = window.io(uri, options);
+		// manage socket communication, status and errors
+		this.socket = window.io(config.socketServer, config.options);
 		this.socket.on(config.orderMessage, this.onOrderMessage.bind(this));
 		this.socket.on(config.systemMessage, this.onSystemMessage.bind(this));
 		this.socket.on(config.timeMessage, this.onTimeMessage.bind(this));
@@ -37,12 +54,14 @@ class Orders extends React.Component {
 		this.socketErrors();
 	}
 
+	// handle socket io error conditions
 	socketErrors() {
 		config.socketErrors.forEach((error) => {
 			this.socket.on(error, (evt) => this.props.handleSetServerStatus(error));
 		});
 	}
 
+	// format order or history object into an "Order"
 	format(orders) {
 		let results = [];
 		for (var id in orders){
@@ -52,71 +71,75 @@ class Orders extends React.Component {
 			}
 		}
 
-		return this.sort(results);
-	}
-
-	sort(orders) {
-		return orders.sort((order1, order2) => order1.props.sent_at_second < order2.props.sent_at_second ? 1 : -1)
+		return sort(results);
 	}
 
 	componentDidUpdate(prevProps, prevState) {
 		let { orders, history, currentOrder } = this.props;
 
-		if ( 
+		if ( // render only if these conditions:
 				(currentOrder !== prevState.currentOrder) || // new current order
 				(this.state.activeFilter !== prevState.activeFilter) || // new active filter
-				(this.state.historyFilter !== prevState.historyFilter) || // new hisotry filter
+				(this.state.historyFilter !== prevState.historyFilter) || // new history filter
 				(this.props.threshold !== prevProps.threshold) // new cooking time threshold
 			){
 
+			// if active orders are being filtered
 			if (this.state.activeFilter) {
-				orders = this.filters[this.state.activeFilter](orders, this.state.activeFilter);
+				orders = this.filters[this.state.activeFilter](orders, this.state.activeFilter); // get correct filter for tytpe
 				this.activeStatus = <ToolBar { ...{ label: "orders", total: (getLength(this.props.orders) || 0), visible: (getLength(orders) || 0)} }  />
 			} else {
-				this.activeStatus = <span>orders {getLength(orders) || 0}</span>
+				this.activeStatus = <ToolBar { ...{ label: "orders", total: (getLength(this.props.orders) || 0)} }  />
 			}
 
+			// if history is being filtered
 			if (this.state.historyFilter){
-				history = this.filters[this.state.historyFilter](history, this.state.historyFilter);
+				history = this.filters[this.state.historyFilter](history, this.state.historyFilter); // get correct filter for type
 				this.historyStatus = <ToolBar { ...{ label: "orders", total: (getLength(this.props.history) || 0), visible: (getLength(history) || 0)} }  />
 			} else {
-				this.historyStatus = <span>orders {getLength(history) || 0}</span>
+				this.historyStatus = <ToolBar { ...{ label: "orders", total: (getLength(this.props.history) || 0)} } />
 			}
 
 			let formattedOrders = this.format(orders),
 				formattedHistory = this.format(history);
 
 			this.setState({orders: formattedOrders, currentOrder, history:formattedHistory}) 
-
 		}
 	}
 
+	// simulation controls
 	onStartSimulation(){
 		this.props.handleReset();
 		this.socket.emit(config.systemMessage, config.start);
 	}
 
+	// socket io cancel order handler
 	onCancelOrder(id) {
 		this.socket.emit(config.orderMessage, config.cancel, id);
 	}
 
+	// socket io "time message" handler
 	onTimeMessage(time){
 		this.props.handleTime(time);
 	}
 
+	// socket io "order message" handler
 	onOrderMessage(order) {
 		this.props.handleOrderReceived(order);
 	}
 
+	// socket io "system messages" handler
 	onSystemMessage(status){
 		this.props.handleStatusReceived(status);
 	}
 
+	// set cooked fitler threshold
 	onSetCookThreshold(evt) {
 		let threshold = evt.target.value;
 		this.props.handleSetCookThreshold(threshold);
 	}
 
+	// set selected filter
 	onSetSelected(evt, filter) {
 		let isActive = evt.target.classList.contains(activeClass);
 		if (isActive){
@@ -129,7 +152,7 @@ class Orders extends React.Component {
 	}
  
 	render() {
-		let failed = this.props.serverStatus === config.reconnect_failed;
+		let failed = this.props.serverStatus === config.reconnect_failed; // has the socket server failed?
 		return (
 			<Template 
 				{...{ failed, 
@@ -137,27 +160,35 @@ class Orders extends React.Component {
 					orders: {
 						status: this.activeStatus, 
 						items: this.state.orders, 
-						dropDownProps: {id: "activeOrdersID", items: [CREATED, COOKED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt,'activeFilter') }}, 
+						dropDownProps: {id: "activeOrdersID", items: [CREATED, COOKED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt, activeFilter) }}, 
 					history: {
 						status: this.historyStatus, 
 						items: this.state.history, 
-						dropDownProps: {id: "completedOrdersID", items: [CANCELLED, DELIVERED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt,'historyFilter') }}, 
+						dropDownProps: {id: "completedOrdersID", items: [CANCELLED, DELIVERED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt, historyFilter) }}, 
 					status: this.props.status, 
 					serverStatus: this.props.serverStatus, 
 					onClick: this.onStartSimulation.bind(this), 
 					onChange: this.onSetCookThreshold.bind(this) 
+					}
 				}
-			}
 			/>
 		);
 	}
 }
 
+// class functions
 
+// used to get the total number of orders from a history or order object
 const getLength = obj => {
 	return Object.keys(obj).length;
 }
 
+// sort orders by time with most current being first
+const sort = orders => {
+	return orders.sort((order1, order2) => order1.props.sent_at_second < order2.props.sent_at_second ? 1 : -1)
+}
+
+// filter orders by event_name
 const filter = (orders, filterBy) => {
 	let results = {}
 	for (var id in orders){
@@ -170,6 +201,7 @@ const filter = (orders, filterBy) => {
 	return results;
 }
 
+// filter orders by event name and time
 const advancedFilter = (orders, filterBy, time) => { // time = curerent time - thresold
 	let results = {}
 	for (var id in orders){
@@ -182,6 +214,7 @@ const advancedFilter = (orders, filterBy, time) => { // time = curerent time - t
 	return results;
 }
 
+// Redux state management
 const getCurrentOrder = state => state.currentOrder;
 const getOrders = state => state.orders;
 const getStatus = state => state.status;

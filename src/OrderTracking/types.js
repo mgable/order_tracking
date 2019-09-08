@@ -1,11 +1,7 @@
 /* constants */
-export const CREATED = 'CREATED';
-export const COOKED = 'COOKED';
-export const DRIVER_RECEIVED = 'DRIVER_RECEIVED';
-export const DELIVERED = 'DELIVERED';
-export const CANCELLED = 'CANCELLED';
-
 export const activeClass = 'active';
+export const activeFilter = 'activeFilter';
+export const historyFilter = 'historyFilter'
 
 /* event types */
 export const ORDER_RECEIVED = 'ORDER_RECEIVED';
