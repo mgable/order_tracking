@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Order from './Order';
-import { orderRecevied, statusReceived, activeClass, resetOrder, setTime, setCookThreshold } from './types';
+import { orderRecevied, statusReceived, activeClass, resetOrder, setTime, setCookThreshold, setServerStatus } from './types';
 import  * as config  from '../config'; 
 import { DELIVERED, CANCELLED, CREATED, COOKED } from '../config'; 
 import TimeThreshold from './shared/timeThreshold';
@@ -10,6 +10,7 @@ import { DropDown  } from './shared/dropDown';
 import './orderTracking.scss';
 
 const uri = config.socketServer;
+const options = config.options;
 
 class Orders extends React.Component {
 	 constructor(props) {
@@ -30,10 +31,17 @@ class Orders extends React.Component {
 	}
 
 	componentDidMount(){
-		this.socket = window.io(uri);
+		this.socket = window.io(uri, options);
 		this.socket.on(config.orderMessage, this.onOrderMessage.bind(this));
 		this.socket.on(config.systemMessage, this.onSystemMessage.bind(this));
 		this.socket.on(config.timeMessage, this.onTimeMessage.bind(this));
+
+
+		this.socket.on(config.disconnect, (evt) => this.props.handleSetServerStatus(config.disconnect));
+		this.socket.on(config.error, (evt) => this.props.handleSetServerStatus(config.error));
+		this.socket.on(config.reconnecting, (evt) => this.props.handleSetServerStatus(config.reconnecting));
+		this.socket.on(config.connect, (evt) => this.props.handleSetServerStatus(config.connect));
+		this.socket.on(config.reconnect_failed, (evt) => this.props.handleSetServerStatus(config.reconnect_failed));
 	}
 
 	format(orders) {
@@ -117,35 +125,38 @@ class Orders extends React.Component {
 	}
  
 	render() {
+		let html =  (this.props.serverStatus === config.reconnect_failed) ? <div className="server-error"><h1>Server Error</h1><span>The client has lost the connection from the server and has timed out after {config.options.reconnectionAttempts} reconnect attemps. Please check the server and restart this app.</span></div> :
+					<div className="row panel">
+						<div className="col-sm-6 border col active">
+							<div className="status-bar">
+								<h3>Orders</h3>
+								{this.activeStatus}
+								<DropDown props={ {id: "activeOrdersID", items: [CREATED, COOKED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt,'activeFilter') }} />
+
+							</div>
+							{this.state.orders}
+						</div>
+						<div className="col-sm-6 border col history">
+							<div className="status-bar">
+								<h3>History</h3>
+								{this.historyStatus}
+								<DropDown props={ {id: "completedOrdersID", items: [CANCELLED, DELIVERED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt,'historyFilter') }} />
+							</div>
+							{this.state.history}
+						</div>
+					</div>
+
 		return (
 			<div className="order-tracking container">
 				<header>
 					<Button className="status-button" onClick={this.onStartSimulation.bind(this)}>start</Button>
-					<span>status: {this.props.status}</span>
-
+					<span className="simulation-status">simulation: {this.props.status}</span>
+					<span className="server-status">server: <span className={"circle " + this.props.serverStatus}></span></span>
 					<TimeThreshold label={"cook threshold"} handleOnChange={this.onSetCookThreshold.bind(this)}/>
-
 				</header>
 
-				<div className="row panel">
-					<div className="col-sm-6 border col active">
-						<div className="status-bar">
-							<h3>Orders</h3>
-							{this.activeStatus}
-							<DropDown props={ {id: "activeOrdersID", items: [CREATED, COOKED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt,'activeFilter') }} />
-
-						</div>
-						{this.state.orders}
-					</div>
-					<div className="col-sm-6 border col history">
-						<div className="status-bar">
-							<h3>History</h3>
-							{this.historyStatus}
-							<DropDown props={ {id: "completedOrdersID", items: [CANCELLED, DELIVERED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt,'historyFilter') }} />
-						</div>
-						{this.state.history}
-				  </div>
-				</div>
+				{html}
+				
 			</div>
 		);
 	}
@@ -169,7 +180,6 @@ const filter = (orders, filterBy) => {
 }
 
 const advancedFilter = (orders, filterBy, time) => { // time = curerent time - thresold
-	console.info("the time", time)
 	let results = {}
 	for (var id in orders){
 		let order = orders[id];
@@ -187,6 +197,7 @@ const getStatus = state => state.status;
 const getHistory = state => state.history;
 const getTime = state => state.time;
 const getThreshold = state => state.threshold;
+const getServerStatus = state => state.serverStatus;
 
 const mapStateToProps = state => {
 	return {
@@ -195,7 +206,8 @@ const mapStateToProps = state => {
 		status: getStatus(state),
 		history: getHistory(state),
 		time: getTime(state),
-		threshold: getThreshold(state)
+		threshold: getThreshold(state),
+		serverStatus: getServerStatus(state)
 	};
 };
 
@@ -215,6 +227,9 @@ const mapDispatchToProps = dispatch => {
 		},
 		handleSetCookThreshold: threshold => {
 			dispatch(setCookThreshold(threshold))
+		},
+		handleSetServerStatus: status => {
+			dispatch(setServerStatus(status))
 		}
 	};
 };

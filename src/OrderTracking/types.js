@@ -13,6 +13,7 @@ export const STATUS_RECEIVED = 'STATUS_RECEIVED'
 export const RESET_ORDER = 'RESET_ORDER';
 export const TIME_RECEIVED = 'TIME_RECEIVED';
 export const SET_THRESHOLD = 'SET_THRESHOLD';
+export const SET_SERVER_STATUS = 'SET_SERVER_STATUS';
 
 /* event creators */
 export const orderRecevied = order => {
@@ -33,4 +34,8 @@ export const setTime = time => {
 
 export const setCookThreshold = threshold => {
 	return {type: SET_THRESHOLD, threshold };
+}
+
+export const setServerStatus = status => {
+	return {type: SET_SERVER_STATUS, status }
 }

@@ -1,12 +1,14 @@
 .order-tracking {
 
 	header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 		.status-button {
 			margin: 0 10px 0 0;
 		}
 		.time-threshold {
 			form {
-				float: right;
 				width: auto;
 				display: inline;
 				select {
@@ -38,5 +40,35 @@
 				display: none;
 			}
 		}
+	}
+
+	.circle { 
+		vertical-align: middle;
+		display: inline-block;
+		width: 14px;
+		height: 14px;
+		background: transparent; 
+		-moz-border-radius: 70px; 
+		-webkit-border-radius: 70px; 
+		border-radius: 70px;
+		&.reconnecting {
+			background: orange;
+			animation: blinker 1s linear infinite;
+		}
+		&.connect {
+			background: green;
+		}
+		&.reconnect_failed {
+			background: red;
+		}
+		&.disconnect {
+			background: red;
+		}
+	}
+
+	@keyframes blinker {
+	  50% {
+	    opacity: 0;
+	  }
 	}
 }

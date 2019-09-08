@@ -5,7 +5,8 @@ import {
 	STATUS_RECEIVED,
 	RESET_ORDER,
 	TIME_RECEIVED,
-	SET_THRESHOLD
+	SET_THRESHOLD,
+	SET_SERVER_STATUS
 } from './types';
 
 import { simulationStopped, defaultThreshold } from '../config';
@@ -17,11 +18,11 @@ const initialState = {
 	currentOrder: null,
 	status: simulationStopped,
 	time: null,
-	threshold: defaultThreshold
+	threshold: defaultThreshold,
+	serverStatus: null
 };
 
 const Orders = (state = initialState, action) => {
-	console.info(initialState)
 	switch (action.type) {
 		case ORDER_RECEIVED:
 			return orderReceived(state, action);
@@ -33,10 +34,23 @@ const Orders = (state = initialState, action) => {
 			return setTime(state, action);
 		case SET_THRESHOLD:
 			return setThreshold(state, action);
+		case SET_SERVER_STATUS:
+			return setServerStatus(state, action)
 		default:
 			return state;
 	}
 };
+
+const  setServerStatus = (state, action) => {
+	let serverStatus = action.status;
+
+	if (state.serverStatus !== serverStatus) {
+		console.info("serverStatus", serverStatus)
+		return Object.assign({}, state, {serverStatus});
+	}
+
+	return state;
+}
 
 const setThreshold = (state, action) => {
 	let threshold = action.threshold;
