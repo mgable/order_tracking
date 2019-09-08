@@ -5,7 +5,7 @@ export const Template = ( {props} ) => {
 	var { label, status, dropDownProps, items, klass } = props;
 
 	return (
-		<div className={"col-sm-6 border col " + klass }>
+		<div className={"col-md-6 border panel " + klass }>
 			<div className="status-bar">
 				<h3>{label}</h3>
 				{status}
