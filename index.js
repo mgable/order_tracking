@@ -9,8 +9,8 @@ var config = require('./src/config'),
 	 contentSorted;
 
 
-var time = 0; // server time in whole seconds
-var currentContent = null; // holder for data.json
+var time = 0; // int - server time in whole seconds
+var currentContent = []; // array - holder for data.json
 
 // fetch and parse data 
 const fetchtData = () => {
@@ -22,47 +22,55 @@ const fetchtData = () => {
 	}
 }
 
-// get copy of deata
+// get copy of data
 const getDataFn = (data) => {
 	return () => {
-		return JSON.parse(JSON.stringify(data)); // deep copy the data "for demostration purposes only"
+		return JSON.parse(JSON.stringify(data)); // deep copy the data "for simulation purposes only"
 	}
 }
 
+// get fresh data at every "start"
 const getData = getDataFn(fetchtData())
 
 io.on('connection', (socket) => {
-	var cancel;
+	var cancel; // holder for setInterval ID
 	socket.on(config.systemMessage, (msg) => {
-		time = 0;
 		if (msg === config.start){
-			io.emit(config.systemMessage, config.simulationStarted );
-			var itemCount = 0;
+			time = 0; // reset time at start simulation
+			io.emit(config.systemMessage, config.simulationStarted); // emit simulation started message
 
-			currentContent = getData();
+			currentContent = getData(); // get fresh data
 
-			cancel = setInterval(() => {
-				let results = _.where(currentContent, {sent_at_second: time});
+			cancel = setInterval(() => { // set the interval timer to send data every second
+				let results = _.where(currentContent, {sent_at_second: time}); // find all orders which madtch the current time
 
 				_.forEach(results, (result) => {
-					io.emit(config.orderMessage, result);
-					itemCount++
+					io.emit(config.orderMessage, result); // emit orders
 				});
 
-				io.emit(config.timeMessage, {time});
+				io.emit(config.timeMessage, {time}); // emit the current time
 
-				time++;
+				time++; // advance the time
 
-				if (itemCount >= currentContent.length){
+				// delete all the orders sent
+				while(results.length){
+					let sentOrder = results.pop();
+					currentContent = currentContent.filter((order) => order !== sentOrder); // for simulation purposes only
+				}
+
+				// if there are no more orders then complete the simulation
+				if (!currentContent.length){
 					clearInterval(cancel);
 					io.emit(config.systemMessage, config.simulationCompleted);
 				}
 
 			}, 1000);
 
-		} else if (msg === connfig.stop){
+		} else if (msg === config.stop){
 			clearInterval(cancel);
 			io.emit(config.systemMessage, config.simulationStopped );
+		} else {
+			throw new Error ("Error: Unknown message type: ", msg)
 		}
 	});
 
@@ -75,16 +83,16 @@ io.on('connection', (socket) => {
 
 
 const removeFromFeed = (id) => {
-	let item = _.findWhere(currentContent, {id});
+	let item = _.findWhere(currentContent, {id}); // find an instance of the item to be cancelled
 	if (item){
-		item.event_name = config.CANCELLED;
-		currentContent = currentContent.filter((item) => item.id !== id)
-		io.emit(config.orderMessage, item);
+		item.event_name = config.CANCELLED; // make it cancalled
+		io.emit(config.orderMessage, item); // send it back
+		currentContent = currentContent.filter((item) => item.id !== id); // remove all instances of the order from currentContent
 	} else {
 		throw new Error ("Can not find the item to cancel. Perhaps it was already delivered or cancelled")
 	}
 }
 
 http.listen(port, () => {
-  console.log('listening on *:' + port);
+  console.log('listening on *:' + port); // just for good measure ;)
 });
