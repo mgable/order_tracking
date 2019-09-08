@@ -7,7 +7,6 @@ import { DELIVERED, CANCELLED, CREATED, COOKED } from '../config';
 import Template from './templates';
 import {Template as ToolBar} from './templates/toolBar';
 
-
 /** public function
  * @description  controller for Order tracking app
  * @param { object }  orders  active orders indexed by id
@@ -133,15 +132,19 @@ class Orders extends React.Component {
 		this.props.handleStatusReceived(status);
 	}
 
-	// set cooked fitler threshold
+	// set cooked filter threshold
 	onSetCookThreshold(evt) {
-		let threshold = evt.target.value;
-		this.props.handleSetCookThreshold(threshold);
+		let threshold = evt && evt.target && evt.target.value;
+		if (threshold) {
+			this.props.handleSetCookThreshold(threshold);
+		} else {
+			throw new Error ("ERROR: no threshold value sent");
+		}
 	}
 
 	// set selected filter
 	onSetSelected(evt, filter) {
-		let isActive = evt.target.classList.contains(activeClass);
+		let isActive = evt && evt.target && evt.target.classList && evt.target.classList.contains(activeClass);
 		if (isActive){
 			if (this.state[filter] !== evt.target.text){
 				this.setState({[filter]: evt.target.text});
@@ -180,12 +183,20 @@ class Orders extends React.Component {
 
 // used to get the total number of orders from a history or order object
 const getLength = obj => {
-	return Object.keys(obj).length;
+	if (obj && typeof obj === "object"){
+		return Object.keys(obj).length;
+	} else {
+		throw new Error (`${obj} is probably not an object ;)`);
+	}
 }
 
 // sort orders by time with most current being first
 const sort = orders => {
-	return orders.sort((order1, order2) => order1.props.sent_at_second < order2.props.sent_at_second ? 1 : -1)
+	if (orders && Array.isArray(orders)){
+		return orders.sort((order1, order2) => order1.props.sent_at_second < order2.props.sent_at_second ? 1 : -1);
+	} else {
+		throw new Error (`${orders} is probably not an array ;)`);
+	}
 }
 
 // filter orders by event_name

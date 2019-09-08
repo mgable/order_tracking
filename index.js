@@ -34,6 +34,8 @@ const getData = getDataFn(fetchtData())
 
 io.on('connection', (socket) => {
 	var cancel; // holder for setInterval ID
+
+	// system channel handler
 	socket.on(config.systemMessage, (msg) => {
 		if (msg === config.start){
 			time = 0; // reset time at start simulation
@@ -70,13 +72,16 @@ io.on('connection', (socket) => {
 			clearInterval(cancel);
 			io.emit(config.systemMessage, config.simulationStopped );
 		} else {
-			throw new Error ("Error: Unknown message type: ", msg)
+			throw new Error ("Error: Unknown message type: ", msg);
 		}
 	});
 
+	// order message handler
 	socket.on(config.orderMessage, (msg, orderID) => {
 		if (msg === config.cancel && orderID){
 			removeFromFeed(orderID);
+		} else {
+			throw new Error ("Error: Unknown message type: ", msg);
 		}
 	});
 });

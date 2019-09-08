@@ -9,16 +9,21 @@ import {
 
 import { simulationStopped, defaultThreshold, maxOrders, CANCELLED, DELIVERED } from '../config';
 
+// data model
 const initialState = {
 	orders: {}, // all currently "active" orders by id
-	history: {}, // all "delivered" or "cancelled" orders
-	currentOrder: null, // last received order
-	status: simulationStopped, // simulation states
+	history: {}, // all "delivered" or "cancelled" orders by id
+	currentOrder: null, // last order received
+	status: simulationStopped, // simulation status
 	time: null, // server time in whole secondes
 	threshold: defaultThreshold, // "cooked" filter threshold time
-	serverStatus: null // server socket statuws
+	serverStatus: null // server socket status
 };
 
+
+/** public function
+ * @description  model for Order tracking app
+ */
 const Orders = (state = initialState, action) => {
 	switch (action.type) {
 		case ORDER_RECEIVED:
