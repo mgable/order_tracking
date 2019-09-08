@@ -8,16 +8,28 @@ var config = require('./src/config'),
 	 cancelledOrders = {},
 	 contentSorted;
 
-try {
-	let contentRaw = fs.readFileSync('./data.json'),
-		contentJSON = JSON.parse(contentRaw);
-	
-	contentSorted = _.sortBy(contentJSON, "sent_at_second");
-} catch(e) {
-	throw new Error("There was an error parsing the data: " + e)
-}
 
 var time = 0;
+var currentContent = null;
+
+const fetchtData = () => {
+	try {
+		contentRaw = fs.readFileSync('./data.json')
+		return contentJSON = JSON.parse(contentRaw);
+	} catch(e) {
+		throw new Error("There was an error parsing the data: " + e)
+	}
+}
+
+
+const getDataFn = (data) => {
+	return () => {
+		let contentJSON = JSON.parse(JSON.stringify(data));
+		return contentSorted = _.sortBy(contentJSON, "sent_at_second");
+	}
+}
+
+const getData = getDataFn(fetchtData())
 
 io.on('connection', (socket) => {
 	var cancel;
@@ -27,22 +39,30 @@ io.on('connection', (socket) => {
 		if (msg === config.start){
 			io.emit(config.systemMessage, config.simulationStarted );
 			console.log(config.simulationStarted)
-			var itemCount = 0,
-				totalItems = contentSorted.length;
+			var itemCount = 0;
+
+			currentContent = getData();
+
 			cancel = setInterval(() => {
-				let results = _.where(contentSorted, {sent_at_second: time});
-					_.forEach(results, (result) => {
-						io.emit(config.orderMessage, result);
-						itemCount++
-					});
-					io.emit(config.timeMessage, {time});
-					time++;
-					if (itemCount === totalItems){
-						clearInterval(cancel);
-						io.emit(config.systemMessage, config.simulationCompleted );
-						console.log(config.simulationCompleted)
-					}
+				let results = _.where(currentContent, {sent_at_second: time});
+
+				_.forEach(results, (result) => {
+					io.emit(config.orderMessage, result);
+					itemCount++
+				});
+
+				io.emit(config.timeMessage, {time});
+
+				time++;
+
+				if (itemCount >= currentContent.length){
+					clearInterval(cancel);
+					io.emit(config.systemMessage, config.simulationCompleted);
+					console.log(config.simulationCompleted)
+				}
+
 			}, 1000);
+
 		} else if (msg === connfig.stop){
 			clearInterval(cancel);
 			io.emit(config.systemMessage, config.simulationStopped );
@@ -51,7 +71,6 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on(config.orderMessage, (msg, orderID) => {
-		console.info(msg, orderID);
 		if (msg === config.cancel && orderID){
 			removeFromFeed(orderID);
 		}
@@ -60,11 +79,10 @@ io.on('connection', (socket) => {
 
 
 const removeFromFeed = (id) => {
-	let item = _.findWhere(contentSorted, {id});
-	console.info("the item", item);
+	let item = _.findWhere(currentContent, {id});
 	if (item){
 		item.event_name = config.CANCELLED;
-		contentSorted = contentSorted.filter((item) => item.id !== id)
+		currentContent = currentContent.filter((item) => item.id !== id)
 		io.emit(config.orderMessage, item);
 	} else {
 		throw new Error ("Can not find the item to cancel. Perhaps it was already delivered or cancelled")

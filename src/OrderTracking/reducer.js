@@ -9,10 +9,9 @@ import {
 	SET_SERVER_STATUS
 } from './types';
 
-import { simulationStopped, defaultThreshold } from '../config';
+import { simulationStopped, defaultThreshold, maxOrders } from '../config';
 
 const initialState = {
-	raw:[],
 	orders: {},
 	history: {},
 	currentOrder: null,
@@ -27,25 +26,29 @@ const Orders = (state = initialState, action) => {
 		case ORDER_RECEIVED:
 			return orderReceived(state, action);
 		case STATUS_RECEIVED:
-			return setStatus(state, action)
+			return setStatus(state, action);
 		case RESET_ORDER:
-			return initialState;
+			return reset(state, action);
 		case TIME_RECEIVED:
 			return setTime(state, action);
 		case SET_THRESHOLD:
 			return setThreshold(state, action);
 		case SET_SERVER_STATUS:
-			return setServerStatus(state, action)
+			return setServerStatus(state, action);
 		default:
 			return state;
 	}
 };
 
+
+const reset = (state, action) => {
+	return Object.assign({}, state, {orders: {}, history: {}, time: null, currentOrder: null, status: simulationStopped });
+}
+
 const  setServerStatus = (state, action) => {
 	let serverStatus = action.status;
 
 	if (state.serverStatus !== serverStatus) {
-		console.info("serverStatus", serverStatus)
 		return Object.assign({}, state, {serverStatus});
 	}
 
@@ -65,6 +68,7 @@ const setThreshold = (state, action) => {
 const setTime = (state, action) => {
 	let time = action.time.time;
 	if (state.time !== time){
+		console.info(time)
 		return Object.assign({}, state, {time});
 	}
 
@@ -80,26 +84,36 @@ const setStatus = (state, action) => {
 	return state;
 }
 
-const cancelOrder = (state, action) => {
+const addToHistory = (state, action) => {
 	let currentOrder = action.order,
 		id = currentOrder.id,
-		history = Object.assign({}, state.history)
+		history = Object.assign({}, state.history),
+		orders = Object.assign({}, state.orders);
 
 	history[id] = currentOrder;
 
-	delete state.orders[id];
-	return Object.assign({}, state, {currentOrder, history})
+	if (Object.keys(history).length >= maxOrders) { // do not let the object get too big
+		let values = Object.values(history),
+			sortedValues = values.sort((v1, v2) => v1.sent_at_second > v2.sent_at_second ? 1 : -1),
+			lowestValue = sortedValues.pop(),
+			id = lowestValue.id;
+
+		delete history[id];
+
+	}
+
+	delete orders[id];
+
+	return Object.assign({}, state, {currentOrder, history, orders})
 }
 
 const addOrder = (state, action) => {
 	let currentOrder = action.order;
 	if (currentOrder.id) {
-		let raw = state.raw.slice(0),
-			orders = Object.assign({}, state.orders);
+		let orders = Object.assign({}, state.orders);
 
 		orders[currentOrder.id] = currentOrder;
-		raw.push(currentOrder);
-		return Object.assign({}, state, {currentOrder, orders, raw});
+		return Object.assign({}, state, {currentOrder, orders});
 	}
 
 	return state;
@@ -110,7 +124,7 @@ const orderReceived = (state, action) => {
 	switch (currentOrder.event_name) {
 		case CANCELLED: 
 		case DELIVERED:
-			return cancelOrder(state, action);
+			return addToHistory(state, action);
 		default:
 			return addOrder(state, action);
 	}

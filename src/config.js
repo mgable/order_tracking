@@ -13,12 +13,13 @@ const orderMessage = "order-message";
 const systemMessage = "system-message";
 const timeMessage = "time-message";
 
-// socket io connection states
+// socket io connection errors
 const disconnect = 'disconnect';
 const reconnect ='reconnect';
 const connect = 'connect';
 const reconnecting = 'reconnecting';
-const reconnect_failed  = 'reconnect_failed';
+const reconnect_failed = 'reconnect_failed';
+const socketErrors = [disconnect, reconnect, connect, reconnecting, reconnect_failed ];
 
 // simulation status
 const simulationStarted = "started";
@@ -27,6 +28,9 @@ const simulationStopped = "stopped";
 
 // default time for 'cooked' filter 
 const defaultThreshold = 5;
+
+// maximum orders allowed in history
+const maxOrders = 5000;
 
 // simulation message statuses
 const stop = 'stop';
@@ -52,10 +56,12 @@ module.exports.reconnect = reconnect;
 module.exports.connect = connect;
 module.exports.reconnect_failed = reconnect_failed;
 module.exports.reconnecting = reconnecting;
+module.exports.socketErrors = socketErrors;
 module.exports.simulationStarted = simulationStarted;
 module.exports.simulationCompleted = simulationCompleted;
 module.exports.simulationStopped = simulationStopped;
 module.exports.defaultThreshold = defaultThreshold;
+module.exports.maxOrders = maxOrders;
 module.exports.CANCELLED = CANCELLED;
 module.exports.CREATED = CREATED;
 module.exports.DRIVER_RECEIVED = DRIVER_RECEIVED;
