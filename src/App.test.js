@@ -9,7 +9,9 @@ import reducer, { initialState }  from './OrderTracking/reducer';
 const mockStore = configureStore(reducer);
 const store = mockStore(initialState)
 
-it('renders without crashing', () => {
-    const wrapper = render(<Provider store={store}><App  /></Provider>);
-  	expect(wrapper).toMatchSnapshot();
+describe("The Order Tracking App", () => {
+	it('renders without crashing', () => {
+		const wrapper = render(<Provider store={store}><App  /></Provider>);
+		expect(wrapper).toMatchSnapshot();
+	});
 });
