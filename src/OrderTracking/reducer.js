@@ -43,11 +43,13 @@ const Orders = (state = initialState, action) => {
 	}
 };
 
-
+// reset the order to restart the simulation
+// do not reset "serverStatus" or "threshold"
 const reset = (state, action) => {
 	return Object.assign({}, state, {orders: {}, history: {}, time: null, currentOrder: null, status: simulationStopped });
 }
 
+// set the status of the socket server
 const setServerStatus = (state, action) => {
 	let serverStatus = action.status;
 
@@ -58,6 +60,7 @@ const setServerStatus = (state, action) => {
 	return state;
 }
 
+// set the cooked filter time threshold
 const setThreshold = (state, action) => {
 	let threshold = action.threshold;
 
@@ -67,9 +70,10 @@ const setThreshold = (state, action) => {
 
 	return state;
 }
- 
+
+// set the time supplied by the server
 const setTime = (state, action) => {
-	let time = action.time.time;
+	let time = action.time;
 	if (state.time !== time){
 		return Object.assign({}, state, {time});
 	}
@@ -77,6 +81,7 @@ const setTime = (state, action) => {
 	return state;
 }
 
+// set the simulation status to "start" or "stop"
 const setSimulationStatus = (state, action) => {
 	let status = action.status;
 	if (state.status !== status){
@@ -86,6 +91,7 @@ const setSimulationStatus = (state, action) => {
 	return state;
 }
 
+// add an order of type CANNCELLED or DELIEVERED to history
 const addToHistory = (state, action) => {
 	let currentOrder = action.order,
 		id = currentOrder.id,
@@ -94,6 +100,7 @@ const addToHistory = (state, action) => {
 
 	history[id] = currentOrder;
 
+	// manage the memory on this as the history will grow with each order
 	if (Object.keys(history).length >= maxOrders) { // do not let the history object get too big
 		let values = Object.values(history),
 			sortedValues = values.sort((v1, v2) => v1.sent_at_second > v2.sent_at_second ? 1 : -1),
@@ -109,6 +116,7 @@ const addToHistory = (state, action) => {
 	return Object.assign({}, state, {currentOrder, history, orders})
 }
 
+// add an order of type CREATED, COOKED, DRIVER_RECEIVED to orders
 const addOrder = (state, action) => {
 	let currentOrder = action.order;
 	if (currentOrder.id) {
@@ -120,7 +128,8 @@ const addOrder = (state, action) => {
 
 	return state;
 }
- 
+
+// receive all orders
 const orderReceived = (state, action) => {
 	let currentOrder = action.order;
 	switch (currentOrder.event_name) {
@@ -131,6 +140,5 @@ const orderReceived = (state, action) => {
 			return addOrder(state, action);
 	}
 };
-
 
 export default Orders;

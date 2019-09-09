@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
 					io.emit(config.orderMessage, result); // emit orders
 				});
 
-				io.emit(config.timeMessage, {time}); // emit the current time
+				io.emit(config.timeMessage, time); // emit the current time
 
 				time++; // advance the time
 
