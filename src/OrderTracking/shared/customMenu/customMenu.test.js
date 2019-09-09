@@ -4,9 +4,11 @@ import { shallow, render } from 'enzyme';
 import { CustomMenu } from './';
 import configureStore from 'redux-mock-store';
 
-let props = {onClick: jest.fn()}
+let props = {id: "foo", className: "bar"}
 
-it('renders CustomMenu without crashing', () => {
-    const wrapper = render(<CustomMenu props = { {...props} } />);
-  	expect(wrapper).toMatchSnapshot();
+describe("Custom Menu", () => {
+	it('renders without crashing', () => {
+	    const wrapper = render(<CustomMenu {...props} />);
+	  	expect(wrapper).toMatchSnapshot();
+	});
 });

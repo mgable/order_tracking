@@ -1,9 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders CustomMenu without crashing 1`] = `
-<div>
+exports[`Custom Menu renders without crashing 1`] = `
+<div
+  class="bar"
+>
   <ul
     class="list-unstyled"
+    id="foo"
   />
 </div>
 `;

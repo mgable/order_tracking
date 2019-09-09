@@ -4,7 +4,6 @@ import { Button } from 'react-bootstrap';
 export class CustomToggle extends React.Component {
   constructor(props, context) {
     super(props, context);
-
     this.handleClick = this.handleClick.bind(this);
   }
 

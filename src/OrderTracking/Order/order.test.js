@@ -22,5 +22,5 @@ describe("Order Module", () => {
 			.simulate('click');
 
 		expect(props.onCancelOrder).toHaveBeenCalled();
-	})
+	});
 });
