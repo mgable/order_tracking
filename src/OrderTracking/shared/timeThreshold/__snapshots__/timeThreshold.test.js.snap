@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders without crashing 1`] = `
+<span
+  class="time-threshold"
+>
+  <form
+    class=""
+  >
+    <label
+      class="form-label"
+    >
+      please add label
+    </label>
+    <select
+      class="form-control"
+    >
+      <option
+        value="5"
+      >
+        5
+      </option>
+      <option
+        value="10"
+      >
+        10
+      </option>
+      <option
+        value="15"
+      >
+        15
+      </option>
+      <option
+        value="20"
+      >
+        20
+      </option>
+    </select>
+  </form>
+</span>
+`;

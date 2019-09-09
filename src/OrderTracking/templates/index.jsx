@@ -21,7 +21,7 @@ const Template = (props) => {
 			<header>
 				<Button className="status-button" onClick={onClick}>start</Button>
 				<span className="simulation-status">simulation: {status}</span>
-				<span className="server-status">server: <span className={"circle " + serverStatus}></span></span>
+				<span className="server-status">server: <span className={"circle " + (serverStatus || "")}></span></span>
 				<TimeThreshold label={"cook threshold"} handleOnChange={onChange}/>
 			</header>
 

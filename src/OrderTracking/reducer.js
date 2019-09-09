@@ -10,7 +10,7 @@ import {
 import { simulationStopped, defaultThreshold, maxOrders, CANCELLED, DELIVERED } from '../config';
 
 // data model
-const initialState = {
+export const initialState = {
 	orders: {}, // all currently "active" orders by id
 	history: {}, // all "delivered" or "cancelled" orders by id
 	currentOrder: null, // last order received

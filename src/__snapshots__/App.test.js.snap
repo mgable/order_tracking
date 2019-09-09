@@ -24,7 +24,7 @@ exports[`renders without crashing 1`] = `
       >
         server: 
         <span
-          class="circle null"
+          class="circle "
         />
       </span>
       <span
