@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { shallow, render } from 'enzyme';
 import App from './App';
 import configureStore from 'redux-mock-store';
+import { Provider } from 'react-redux';
 
 
 import reducer from './OrderTracking/reducer';
@@ -21,11 +22,11 @@ const mockStore = configureStore(reducer);
 const store = mockStore(initialState)
 
 
-console.info("store", store)
+console.info("unit test store", store)
 
 
 it('renders without crashing', () => {
-    const wrapper = render(<App store={store} />);
+    const wrapper = render(<Provider store={store}><App  /></Provider>);
   	expect(wrapper).toMatchSnapshot();
 });
 

@@ -2,8 +2,121 @@
 
 exports[`renders without crashing 1`] = `
 <div
-  className="app"
+  class="app"
 >
-  <Connect(Orders) />
+  <div
+    class="order-tracking container"
+  >
+    <header>
+      <button
+        class="status-button btn btn-primary"
+        type="button"
+      >
+        start
+      </button>
+      <span
+        class="simulation-status"
+      >
+        simulation: stopped
+      </span>
+      <span
+        class="server-status"
+      >
+        server: 
+        <span
+          class="circle null"
+        />
+      </span>
+      <span
+        class="time-threshold"
+      >
+        <form
+          class=""
+        >
+          <label
+            class="form-label"
+          >
+            cook threshold
+          </label>
+          <select
+            class="form-control"
+          >
+            <option
+              value="5"
+            >
+              5
+            </option>
+            <option
+              value="10"
+            >
+              10
+            </option>
+            <option
+              value="15"
+            >
+              15
+            </option>
+            <option
+              value="20"
+            >
+              20
+            </option>
+          </select>
+        </form>
+      </span>
+    </header>
+    <div
+      class="row panel"
+    >
+      <div
+        class="col-md-6 border panel active"
+      >
+        <div
+          class="status-bar"
+        >
+          <h3>
+            Orders
+          </h3>
+          <div
+            class="dropdown"
+          >
+            <button
+              class="btn btn-primary"
+              type="button"
+            >
+              Filter
+            </button>
+          </div>
+        </div>
+        <p>
+          There are no orders
+        </p>
+      </div>
+      <div
+        class="col-md-6 border panel history"
+      >
+        <div
+          class="status-bar"
+        >
+          <h3>
+            History
+          </h3>
+          <div
+            class="dropdown"
+          >
+            <button
+              class="btn btn-primary"
+              type="button"
+            >
+              Filter
+            </button>
+          </div>
+        </div>
+        <p>
+          There is no history
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
 `;
