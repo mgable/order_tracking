@@ -19,6 +19,8 @@ var order = {
 const mockStore = configureStore(reducer);
 const store = mockStore(initialState)
 
+import { simulationStarted } from '../config';
+
 
 describe('Template', () => {
 	it('renders without crashing', () => {
@@ -35,7 +37,7 @@ describe('Reducer', () => {
 	});
 
 	it('should add an order', () => {
-		let state = Object.assign({}, initialState, { orders: {[order.id]: order}, currentOrder: order });
+		let state = Object.assign({}, initialState, { orders: {[order.id]: order},  status: simulationStarted , currentOrder: order, cache: [order.id] });
 		expect(
 			reducer(undefined, orderRecevied(order))
 		).toEqual(state);
