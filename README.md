@@ -12,9 +12,14 @@ The challenge was bootstrapped with create-react-app and the details for running
 
 ## Summery of operations:
 
-### `npm start` - to start the simulation, both the socket server and the React front end
-### `npm test` - to run the Jest unit tests
-### `npm run start_server` - to independently run the socket server
+### `npm start`
+to start the simulation, both the socket server and the React front end
+
+### `npm test`
+to run the Jest unit tests
+
+### `npm run start_server`
+to independently run the socket server
 
 The green "start" button at the top left corner of the app starts the simulation, that is, instructs the socket server to being serving orders. Clicking it again stops and resets the simulation. 
 
