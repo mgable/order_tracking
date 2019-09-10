@@ -17,7 +17,8 @@ export const initialState = {
 	status: simulationStopped, // simulation status
 	time: null, // server time in whole secondes
 	threshold: defaultThreshold, // "cooked" filter threshold time
-	serverStatus: null // server socket status
+	serverStatus: null, // server socket status
+	cache: [] // ids of orders as they come in
 };
 
 
@@ -91,39 +92,37 @@ const setSimulationStatus = (state, action) => {
 	return state;
 }
 
-// add an order of type CANNCELLED or DELIEVERED to history
+// add an order of type CANCELLED or DELIEVERED to history
 const addToHistory = (state, action) => {
 	let currentOrder = action.order,
 		id = currentOrder.id,
 		history = Object.assign({}, state.history),
-		orders = Object.assign({}, state.orders);
+		orders = Object.assign({}, state.orders),
+		cache = state.cache.slice(0);
 
 	history[id] = currentOrder;
 
 	// manage the memory on this as the history will grow with each order
 	if (Object.keys(history).length >= maxOrders) { // do not let the history object get too big
-		let values = Object.values(history),
-			sortedValues = values.sort((v1, v2) => v1.sent_at_second > v2.sent_at_second ? 1 : -1),
-			lowestValue = sortedValues.pop(),
-			id = lowestValue.id;
-
+		let id = cache.shift(); // first in - first out
 		delete history[id];
-
 	}
 
 	delete orders[id];
 
-	return Object.assign({}, state, {currentOrder, history, orders})
+	return Object.assign({}, state, {currentOrder, history, orders, cache})
 }
 
 // add an order of type CREATED, COOKED, DRIVER_RECEIVED to orders
 const addOrder = (state, action) => {
 	let currentOrder = action.order;
 	if (currentOrder.id) {
-		let orders = Object.assign({}, state.orders);
+		let orders = Object.assign({}, state.orders),
+			cache = state.cache.slice(0);
 
 		orders[currentOrder.id] = currentOrder;
-		return Object.assign({}, state, {currentOrder, orders, status: simulationStarted});
+		cache.push(currentOrder.id);
+		return Object.assign({}, state, {currentOrder, orders, status: simulationStarted, cache});
 	}
 
 	return state;
