@@ -7,7 +7,7 @@ import {
 	SET_SERVER_STATUS
 } from './types';
 
-import { simulationStopped, defaultThreshold, maxOrders, CANCELLED, DELIVERED } from '../config';
+import { simulationStopped, simulationStarted, defaultThreshold, maxOrders, CANCELLED, DELIVERED } from '../config';
 
 // data model
 export const initialState = {
@@ -123,7 +123,7 @@ const addOrder = (state, action) => {
 		let orders = Object.assign({}, state.orders);
 
 		orders[currentOrder.id] = currentOrder;
-		return Object.assign({}, state, {currentOrder, orders});
+		return Object.assign({}, state, {currentOrder, orders, status: simulationStarted});
 	}
 
 	return state;
