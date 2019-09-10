@@ -22,12 +22,13 @@
         "underscore": "^1.9.1"
     },
     "scripts": {
-        "start": "npm-run-all -p watch-css start-js start_nodemon",
+        "start": "npm-run-all -p watch-css start-js start_server",
         "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive --skip-initial",
         "build-css": "node-sass-chokidar src/ -o src/",
         "start-js": "react-scripts start",
         "build": "react-scripts build",
-        "start_nodemon": "nodemon index.js",
+        "start_server": "node index.js",
+        "start_server_mon": "nodemon index.js",
         "test-react": "react-scripts test --env=jsdom",
         "test": "jest",
         "test:watch": "npm test -- --watch"

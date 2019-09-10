@@ -6,6 +6,8 @@
 		justify-content: space-between;
 		.status-button {
 			margin: 0 10px 0 0;
+			&.started {
+			}
 		}
 		.time-threshold {
 			form {

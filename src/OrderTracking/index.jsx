@@ -106,10 +106,15 @@ class Orders extends React.Component {
 		}
 	}
 
-	// simulation controls
-	onStartSimulation(){
+	// simulation controls: start and stop
+	onSimulationControls(){
 		this.props.handleReset();
-		this.socket.emit(config.systemMessage, config.start);
+
+		if(this.props.status === config.simulationStopped || this.props.status === config.simulationCompleted) {
+			this.socket.emit(config.systemMessage, config.start);
+		} else {
+			this.socket.emit(config.systemMessage, config.stop);
+		}
 	}
 
 	// socket io cancel order handler
@@ -170,7 +175,7 @@ class Orders extends React.Component {
 						dropDownProps: {id: "completedOrdersID", items: [CANCELLED, DELIVERED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt, historyFilter) }}, 
 					status: this.props.status, 
 					serverStatus: this.props.serverStatus, 
-					onClick: this.onStartSimulation.bind(this), 
+					onClick: this.onSimulationControls.bind(this), 
 					onChange: this.onSetCookThreshold.bind(this) 
 					}
 				}

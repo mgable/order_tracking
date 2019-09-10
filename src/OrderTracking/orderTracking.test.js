@@ -14,17 +14,16 @@ var order = {
 	"id": "4b76edbf",
 	"name": "Cheese pizza",
 	"sent_at_second": 4
-}
+};
 
 const mockStore = configureStore(reducer);
-const store = mockStore(initialState)
+const store = mockStore(initialState);
 
 import { simulationStarted } from '../config';
 
-
 describe('Template', () => {
 	it('renders without crashing', () => {
-		const wrapper = render(<Provider store={store}><Orders  /></Provider>);
+		const wrapper = render(<Provider store={store}><Orders /></Provider>);
 		expect(wrapper).toMatchSnapshot();
 	});
 });

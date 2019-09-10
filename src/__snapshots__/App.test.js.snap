@@ -9,10 +9,10 @@ exports[`The Order Tracking App renders without crashing 1`] = `
   >
     <header>
       <button
-        class="status-button btn btn-primary"
+        class="status-button stopped btn btn-success"
         type="button"
       >
-        start
+        Start
       </button>
       <span
         class="simulation-status"
