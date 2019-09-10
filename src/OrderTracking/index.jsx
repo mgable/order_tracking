@@ -104,6 +104,11 @@ class Orders extends React.Component {
 
 			this.setState({orders: formattedOrders, currentOrder, history:formattedHistory}) 
 		}
+
+		// reset simulation if connection fails.
+		if (prevProps.serverStatus === config.reconnect){
+			this.props.handleReset();
+		}
 	}
 
 	// simulation controls: start and stop
@@ -168,11 +173,11 @@ class Orders extends React.Component {
 					orders: {
 						status: this.activeStatus, 
 						items: this.state.orders, 
-						dropDownProps: {id: "activeOrdersID", items: [CREATED, COOKED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt, activeFilter) }}, 
+						dropDownProps: {id: "activeOrdersID", items: [CREATED, COOKED], label: (this.state.activeFilter || "Filter"), onSetSelected: (evt) => this.onSetSelected(evt, activeFilter) }}, 
 					history: {
 						status: this.historyStatus, 
 						items: this.state.history, 
-						dropDownProps: {id: "completedOrdersID", items: [CANCELLED, DELIVERED], label: "Filter", onSetSelected: (evt) => this.onSetSelected(evt, historyFilter) }}, 
+						dropDownProps: {id: "completedOrdersID", items: [CANCELLED, DELIVERED], label: (this.state.historyFilter || "Filter"), onSetSelected: (evt) => this.onSetSelected(evt, historyFilter) }}, 
 					status: this.props.status, 
 					serverStatus: this.props.serverStatus, 
 					onClick: this.onSimulationControls.bind(this), 

@@ -2,6 +2,9 @@ import React from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { CustomMenu, CustomToggle } from '../customMenu';
 import { activeClass } from '../../types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSortDown } from '@fortawesome/free-solid-svg-icons'
+
 
 
 export const DropDown = ({ props }) => {
@@ -27,8 +30,8 @@ export const DropDown = ({ props }) => {
 
 	return (
 		<Dropdown>
-			<Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
-				{label}
+			<Dropdown.Toggle split as={CustomToggle} id="dropdown-custom-components">
+				{label} <FontAwesomeIcon icon={faSortDown} />
 			</Dropdown.Toggle>
 			<Dropdown.Menu as={CustomMenu} id={id}>
 				{itemsHTML}

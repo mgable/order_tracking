@@ -25,6 +25,16 @@
 	.panel {
 		clear: both;
 		margin: 20px 0;
+		.dropdown {
+			width: 130px;
+			button {
+				width: 100%;
+				white-space: nowrap;
+				svg {
+					vertical-align: baseline;
+				}
+			}
+		}
 	}
 
 	.status-bar {
