@@ -1,3 +1,31 @@
+Thank you for the opportunity to submit this coding challenge. I found it very enjoyable. Cloud Kitchens sounds like a great opportunity.
+
+My solutions stack is React for the view library and Redux for state management. I chose these two technologies because they are industry leaders with a large user and knowledge base. It makes it easier to find people and solutions. Also a big user base enhances the longevity of the product.
+
+Personally I like React because it lends itself to a web components architecture which I find easy to share, extend and maintain. Also it runs on node which plays to my skill set. When paired with Redux I find it very easy to write components in a Model-View, View, Controller design pattern with Redux supplying the model and controller functionality. Redux also nicely encapsulates the business logic in the reducer and controller. And while not being totally portable, it does keep everything in one place and provides a template for component design.
+
+Sass for css optimization, Bootstrap for page layout, underscore for utilities and socket.io were also chosen because they are all very accessible and easy to use.
+
+My code is written in a mostly functional manner with a shared library of components. I have left comments in the code explaining the behavior. The tests are written using Jest and Enzyme, two other industry standards, and while not being exhaustive, they are adequate for the situation.
+
+The challenge was bootstrapped with create-react-app and the details for running it are detailed below. It requires node version v11.10.1 or above. 
+
+## Summery of operations:
+
+### `npm start` - to start the simulation, both the socket server and the React front end
+### `npm test` - to run the Jest unit tests
+### `npm run start_server` - to independently run the socket server
+
+The green "start" button at the top left corner of the app starts the simulation, that is, instructs the socket server to being serving orders. Clicking it again stops and resets the simulation. 
+
+The code has been zipped and attached. The code is also hosted on my Github account [here](https://github.com/mgable/order_tracking)
+
+If you have and questions, comments or concerns please reach out!
+
+Thanks again.
+
+
+====================================================================================================
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
