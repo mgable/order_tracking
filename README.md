@@ -1,4 +1,4 @@
-Thank you for the opportunity to submit this coding challenge. I found it very enjoyable. Cloud Kitchens sounds like a great opportunity.
+Thank you for the opportunity to submit this coding challenge. I found it very enjoyable. Your company sounds like a great opportunity.
 
 My solutions stack is React for the view library and Redux for state management. I chose these two technologies because they are industry leaders with a large user and knowledge base. It makes it easier to find people and solutions. Also a big user base enhances the longevity of the product.
 
