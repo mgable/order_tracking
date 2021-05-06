@@ -19,7 +19,7 @@
         "redux": "^4.0.4",
         "save": "^2.4.0",
         "socket.io": "^1.7.3",
-        "underscore": "^1.9.1"
+        "underscore": "^1.12.1"
     },
     "scripts": {
         "start": "npm-run-all -p watch-css start-js start_server",
